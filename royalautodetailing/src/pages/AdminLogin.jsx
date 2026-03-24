@@ -25,7 +25,8 @@ function AdminLogin() {
       setError(error.message);
     } else {
       localStorage.setItem("isAdmin", "true");
-      navigate("/admin-dashboard");
+      // Redirect to homepage and show hello admin
+      navigate("/");
     }
   };
 
