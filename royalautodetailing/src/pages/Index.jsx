@@ -6,6 +6,8 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 function Index() {
+    // Check admin login status
+    const isAdmin = typeof window !== 'undefined' && localStorage.getItem('isAdmin') === 'true';
     return (
         <div>
             <>
@@ -102,6 +104,11 @@ function Index() {
                             <a href="contact.html" className="nav-item nav-link">
                                 Contact Us
                             </a>
+                            {isAdmin && (
+                                <a href="/admin-dashboard" className="nav-item nav-link text-warning fw-bold">
+                                    <i className="fas fa-user-shield me-2"></i>Admin Dashboard
+                                </a>
+                            )}
                         </div>
                         <a href="" className="btn btn-primary py-4 px-lg-5 d-none d-lg-block">
                             Book Now
@@ -893,11 +900,11 @@ function Index() {
                     <div className="container py-5">
                         <div className="row g-5">
                             <div className="col-lg-3 col-md-6">
-                                        <h4 className="text-light mb-4">Contact</h4>
-                                        <p className="mb-2"><i className="fa fa-map-marker-alt me-3" />90 horseshoe lake drive Halifax B3S0B4</p>
-                                        <p className="mb-2"><i className="fa fa-phone-alt me-3" />Phone: +1 (782) 882-0667</p>
-                                        <p className="mb-2"><i className="fa fa-phone-alt me-3" />Phone: +1 (902) 412-2913</p>
-                                <div className="d-flex pt-2">
+                                <h4 className="text-light mb-4">Contact</h4>
+                                <p className="mb-2"><i className="fa fa-map-marker-alt me-3" />90 horseshoe lake drive Halifax B3S0B4</p>
+                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />Phone: +1 (782) 882-0667</p>
+                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />Phone: +1 (902) 412-2913</p>
+                                <div className="d-flex pt-2 mb-2">
                                     <a className="btn btn-outline-light btn-social" href="">
                                         <i className="fab fa-twitter" />
                                     </a>
@@ -911,6 +918,9 @@ function Index() {
                                         <i className="fab fa-linkedin-in" />
                                     </a>
                                 </div>
+                                <a className="btn btn-warning w-100 mt-2" href="/admin-login">
+                                    <i className="fas fa-user-shield me-2"></i>Admin Login
+                                </a>
                             </div>
                             <div className="col-lg-3 col-md-6">
                                 <h4 className="text-light mb-4">Useful links</h4>
