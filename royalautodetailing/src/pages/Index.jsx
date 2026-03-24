@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -8,9 +8,49 @@ import "swiper/css/pagination";
 function Index() {
     // Check admin login status
     const isAdmin = typeof window !== 'undefined' && localStorage.getItem('isAdmin') === 'true';
+    const [showAdminToast, setShowAdminToast] = useState(isAdmin);
+
+    useEffect(() => {
+        if (isAdmin) {
+            setShowAdminToast(true);
+            const timer = setTimeout(() => setShowAdminToast(false), 2500);
+            return () => clearTimeout(timer);
+        }
+    }, [isAdmin]);
+
     return (
         <div>
-            <>
+            {showAdminToast && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 20,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 9999,
+                        minWidth: 220,
+                        maxWidth: '90vw',
+                        background: 'linear-gradient(90deg, #0866ff 0%, #00cdff 100%)',
+                        color: '#fff',
+                        borderRadius: 12,
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                        padding: '1rem 1.5rem',
+                        fontWeight: 600,
+                        fontSize: 18,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        animation: 'fadeInDown 0.5s',
+                    }}
+                    className="admin-toast"
+                >
+                    <span style={{fontSize: 22, display: 'flex', alignItems: 'center'}}>
+                        <i className="fas fa-user-shield"></i>
+                    </span>
+                    <span>Welcome, Admin!</span>
+                </div>
+            )}
+			<>
 
                 {/* Topbar Start */}
                 <div className="container-fluid bg-light p-0">
