@@ -62,13 +62,13 @@ function Index() {
                             </div>
                             <div className="h-100 d-inline-flex align-items-center py-3">
                                 <small className="far fa-clock text-primary me-2" />
-                                <small>Phone: +1 (782) 882-0667</small>
+                                <small>+1 (782) 882-0667</small>
                             </div>
                         </div>
                         <div className="col-lg-5 px-5 text-end">
                             <div className="h-100 d-inline-flex align-items-center py-3 me-4">
                                 <small className="fa fa-phone-alt text-primary me-2" />
-                                <small>Phone: +1 (902) 412-2913</small>
+                                <small>+1 (902) 412-2913</small>
                             </div>
                             <div className="h-100 d-inline-flex align-items-center">
                                 <a className="btn btn-sm-square bg-white text-primary me-1" href="">
@@ -94,10 +94,13 @@ function Index() {
                         href="index.html"
                         className="navbar-brand d-flex align-items-center px-4 px-lg-5"
                     >
-                        <h2 className="m-0 text-primary">
-                            <i className="fa fa-car me-3" />
-                            ROYALz Auto Detailing
-                        </h2>
+                        <a href="/" className="navbar-brand p-0">
+                            <img
+                                src="/img/royallogo.png"
+                                alt="Royal Auto Detailing"
+                                style={{ height: "60px" }}
+                            />
+                        </a>
                     </a>
                     <button
                         type="button"
@@ -171,17 +174,18 @@ function Index() {
                                     <div className="container">
                                         <div className="row align-items-center justify-content-center justify-content-lg-start">
                                             <div className="col-10 col-lg-7 text-center text-lg-start">
-                                                <h6 className="text-white text-uppercase mb-3 animated slideInDown">
-                                                PROFESSIONAL AND FAST
-                                                </h6>
+
                                                 <h1 className="display-3 text-white mb-4 pb-3 animated slideInDown">
-                                                    ROYALz Auto Detailing
+                                                    ROYALZ AUTO DETAILING
                                                 </h1>
+                                                <h6 className="text-white text-uppercase mb-3  animated slideInDown">
+                                                    PROFESSIONAL AND FAST AUTO DETAILING SERVICES IN HALIFAX
+                                                </h6>
                                                 <a
                                                     href=""
-                                                    className="btn btn-primary py-3 px-5 animated slideInDown"
+                                                    className="btn btn-primary py-3 px-5 mt-3 animated slideInDown"
                                                 >
-                                                    Scroll Down
+                                                    Book Now
                                                 </a>
                                             </div>
                                             <div className="col-lg-5 d-none d-lg-flex animated zoomIn">
@@ -191,14 +195,14 @@ function Index() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="carousel-item">
+                            {/* <div className="carousel-item">
                                 <img className="w-100" src="img/carousel-bg-2.jpg" alt="Image" />
                                 <div className="carousel-caption d-flex align-items-center">
                                     <div className="container">
                                         <div className="row align-items-center justify-content-center justify-content-lg-start">
                                             <div className="col-10 col-lg-7 text-center text-lg-start">
                                                 <h6 className="text-white text-uppercase mb-3 animated slideInDown">
-                                                Ppf | Ceramic | Wrap | Tint
+                                                    Ppf | Ceramic | Wrap | Tint
                                                 </h6>
                                                 <h1 className="display-3 text-white mb-4 pb-3 animated slideInDown">
                                                     Specialized Services for All Your Vehicles
@@ -216,9 +220,9 @@ function Index() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
-                        <button
+                        {/* <button
                             className="carousel-control-prev"
                             type="button"
                             data-bs-target="#header-carousel"
@@ -235,50 +239,71 @@ function Index() {
                         >
                             <span className="carousel-control-next-icon" aria-hidden="true" />
                             <span className="visually-hidden">Next</span>
-                        </button>
+                        </button> */}
                     </div>
                 </div>
                 {/* Carousel End */}
                 {/* Service Start */}
-                <div className="container-xxl py-5">
+                <div className="container-xxl pt-3 pb-5">
                     <div className="container">
                         <div className="row g-4">
-                            <div className="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                                <div className="d-flex py-5 px-4">
-                                    <i className="fa fa-certificate fa-3x text-primary flex-shrink-0" />
-                                    <div className="ps-4">
-                                        <h5 className="mb-3">Ceramic Coating</h5>
-                                        <p>Protect your car’s paint with our advanced ceramic coating services. Ceramic coatings provide a durable, high-gloss finish that shields your vehicle from environmental contaminants, UV rays, and minor scratches.</p>
-                                        <a className="text-secondary border-bottom" href="">
-                                            Read More
-                                        </a>
+
+                            {/* 1 */}
+                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                                <div className="service-box p-4 h-100">
+                                    <div className="service-icon mb-3">
+                                        <i className="fa fa-certificate"></i>
                                     </div>
+                                    <h5>Ceramic Coating</h5>
+                                    <p>
+                                        Protect your car’s paint with advanced ceramic coating for long-lasting shine and protection.
+                                    </p>
+                                    <a href="#" className="service-link">Learn More →</a>
                                 </div>
                             </div>
-                            <div className="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                                <div className="d-flex bg-light py-5 px-4">
-                                    <i className="fa fa-users-cog fa-3x text-primary flex-shrink-0" />
-                                    <div className="ps-4">
-                                        <h5 className="mb-3">Window Tinting</h5>
-                                        <p>Enhance your vehicle's privacy and reduce glare with our premium window tinting services. Our high-quality tints offer superior heat rejection and UV protection, ensuring a cooler and more comfortable ride.</p>
-                                        <a className="text-secondary border-bottom" href="">
-                                            Read More
-                                        </a>
+
+                            {/* 2 */}
+                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                                <div className="service-box p-4 h-100">
+                                    <div className="service-icon mb-3">
+                                        <i className="fa fa-car"></i>
                                     </div>
+                                    <h5>Window Tinting</h5>
+                                    <p>
+                                        Improve privacy and reduce heat with premium window tinting services.
+                                    </p>
+                                    <a href="#" className="service-link">Learn More →</a>
                                 </div>
                             </div>
-                            <div className="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                                <div className="d-flex py-5 px-4">
-                                    <i className="fa fa-tools fa-3x text-primary flex-shrink-0" />
-                                    <div className="ps-4">
-                                        <h5 className="mb-3">Vehicle Wraps</h5>
-                                        <p>Transform the look of your car with custom vehicle wraps. Whether you want a full-color change, unique graphics, or brand advertising, our expert team will deliver a flawless finish that stands out.</p>
-                                        <a className="text-secondary border-bottom" href="">
-                                            Read More
-                                        </a>
+
+                            {/* 3 */}
+                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                                <div className="service-box p-4 h-100">
+                                    <div className="service-icon mb-3">
+                                        <i className="fa fa-tools"></i>
                                     </div>
+                                    <h5>Vehicle Wraps</h5>
+                                    <p>
+                                        Custom wraps to transform your car’s look with unique styles and branding.
+                                    </p>
+                                    <a href="#" className="service-link">Learn More →</a>
                                 </div>
                             </div>
+
+                            {/* 4 */}
+                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
+                                <div className="service-box p-4 h-100">
+                                    <div className="service-icon mb-3">
+                                        <i className="fa fa-shield-alt"></i>
+                                    </div>
+                                    <h5>Paint Protection Film</h5>
+                                    <p>
+                                        Protect your vehicle from scratches, chips, and damage with high-quality PPF.
+                                    </p>
+                                    <a href="#" className="service-link">Learn More →</a>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -423,8 +448,8 @@ function Index() {
                 <div className="container-xxl service py-5">
                     <div className="container">
                         <div className="text-center wow fadeInUp" data-wow-delay="0.1s">
-                                <h6 className="text-primary text-uppercase">// Pricing Plan //</h6>
-                                <h1 className="mb-5">Pricing Plan</h1>
+                            <h6 className="text-primary text-uppercase">// Pricing Plan //</h6>
+                            <h1 className="mb-5">Pricing Plan</h1>
                         </div>
                         <div className="row g-4 wow fadeInUp" data-wow-delay="0.3s">
                             <div className="col-lg-4">

@@ -407,3 +407,78 @@
 .swiper-pagination-bullet-active {
   transform: scale(1.2);
 }
+/* ===============================
+   🔥 MODERN SERVICE SECTION FIX
+================================ */
+
+/* Service Card */
+.service-box {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    height: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border-bottom: 3px solid var(--primary);
+
+}
+
+/* Hover Effect */
+.service-box:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* Icon Circle */
+.service-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+/* Title */
+.service-box h5 {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+/* Text */
+.service-box p {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Link */
+.service-link {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    position: relative;
+}
+
+.service-link::after {
+    content: "";
+    width: 0%;
+    height: 2px;
+    background: var(--primary);
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    transition: 0.3s;
+}
+
+.service-link:hover::after {
+    width: 100%;
+}
+
+/* Remove old flex layout spacing issue */
+.service .d-flex {
+    display: block !important;
+}
