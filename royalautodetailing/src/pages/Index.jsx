@@ -1,12 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Link } from "react-router-dom";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import CountUp from "react-countup";
+import { useInView } from "react-intersection-observer";
 
 function Index() {
     // Check admin login status
+    const galleryData = [
+        {
+            title: "My Car",
+            desc: "Your car is a reflection of your personality. We provide premium detailing, paint protection, and enhancement services to keep your vehicle looking brand new.",
+            img: "/img/car.jpg"
+        },
+        {
+            title: "Trucks",
+            desc: "Heavy-duty vehicles require specialized care. We handle trucks with advanced cleaning, polishing, and protection techniques for long-lasting durability.",
+            img: "/img/truck.jpg"
+        },
+        {
+            title: "My Fleet",
+            desc: "Maintain a clean and professional fleet. Our services ensure all vehicles stay spotless while minimizing downtime for your business operations.",
+            img: "/img/fleet.jpg"
+        },
+        {
+            title: "My Boat",
+            desc: "Marine detailing services designed to protect against salt, water, and environmental damage, keeping your boat in top condition.",
+            img: "/img/ship.jpg"
+        },
+        {
+            title: "My Motorcycle",
+            desc: "Precision detailing for motorcycles including cleaning, polishing, and protection for every component from engine to wheels.",
+            img: "/img/bike.jpg"
+        }
+    ];
+
+    const [activeIndex, setActiveIndex] = useState(0);
     const isAdmin = typeof window !== 'undefined' && localStorage.getItem('isAdmin') === 'true';
     const [showAdminToast, setShowAdminToast] = useState(isAdmin);
 
@@ -17,6 +49,11 @@ function Index() {
             return () => clearTimeout(timer);
         }
     }, [isAdmin]);
+
+    const { ref, inView } = useInView({
+        triggerOnce: true,
+        threshold: 0.3,
+    });
 
     return (
         <div>
@@ -44,13 +81,13 @@ function Index() {
                     }}
                     className="admin-toast"
                 >
-                    <span style={{fontSize: 22, display: 'flex', alignItems: 'center'}}>
+                    <span style={{ fontSize: 22, display: 'flex', alignItems: 'center' }}>
                         <i className="fas fa-user-shield"></i>
                     </span>
                     <span>Welcome, Admin!</span>
                 </div>
             )}
-			<>
+            <>
 
                 {/* Topbar Start */}
                 <div className="container-fluid bg-light p-0">
@@ -153,10 +190,13 @@ function Index() {
                                 </a>
                             )}
                         </div>
-                        <a href="" className="btn btn-primary py-4 px-lg-5 d-none d-lg-block">
+                        <Link
+                            to="/booking"
+                            className="btn btn-primary py-4 px-lg-5 d-none d-lg-block"
+                        >
                             Book Now
                             <i className="fa fa-arrow-right ms-3" />
-                        </a>
+                        </Link>
                     </div>
                 </nav>
                 {/* Navbar End */}
@@ -335,14 +375,15 @@ function Index() {
                                 </div>
                             </div>
                             <div className="col-lg-6">
-                                <h6 className="text-primary text-uppercase">// Why Trust Us? //</h6>
                                 <h1 className="mb-4">Why Trust Us?</h1>
-                                <ul>
+                                <h6 className="text-primary text-uppercase mb-5">Delivering quality, transparency, and results you can rely on.</h6>
+
+                                {/* <ul>
                                     <li>Experienced Professionals – Honest service every time.</li>
                                     <li>Transparent Pricing – No hidden charges.</li>
                                     <li>Fast Turnaround – Get your car back on the road swiftly.</li>
                                     <li>Advanced Equipment – Using the latest technology for accurate diagnostics.</li>
-                                </ul>
+                                </ul> */}
                                 <div className="row g-4 mb-3 pb-3">
                                     <div className="col-12 wow fadeIn" data-wow-delay="0.1s">
                                         <div className="d-flex">
@@ -353,8 +394,8 @@ function Index() {
                                                 <span className="fw-bold text-secondary">01</span>
                                             </div>
                                             <div className="ps-3">
-                                                <h6>Professional &amp; Expert</h6>
-                                                <span>Diam dolor diam ipsum sit amet diam et eos</span>
+                                                <h6>Experienced Professionals</h6>
+                                                <span>Honest service every time</span>
                                             </div>
                                         </div>
                                     </div>
@@ -367,8 +408,8 @@ function Index() {
                                                 <span className="fw-bold text-secondary">02</span>
                                             </div>
                                             <div className="ps-3">
-                                                <h6>Quality Servicing Center</h6>
-                                                <span>Diam dolor diam ipsum sit amet diam et eos</span>
+                                                <h6>Transparent Pricing</h6>
+                                                <span>No hidden charges.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -381,8 +422,22 @@ function Index() {
                                                 <span className="fw-bold text-secondary">03</span>
                                             </div>
                                             <div className="ps-3">
-                                                <h6>Awards Winning Workers</h6>
-                                                <span>Diam dolor diam ipsum sit amet diam et eos</span>
+                                                <h6>Fast Turnaround</h6>
+                                                <span>Get your car back on the road swiftly.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="col-12 wow fadeIn" data-wow-delay="0.7s">
+                                        <div className="d-flex">
+                                            <div
+                                                className="bg-light d-flex flex-shrink-0 align-items-center justify-content-center mt-1"
+                                                style={{ width: 45, height: 45 }}
+                                            >
+                                                <span className="fw-bold text-secondary">03</span>
+                                            </div>
+                                            <div className="ps-3">
+                                                <h6>Advanced Equipment</h6>
+                                                <span>Using the latest technology for accurate diagnostics.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -397,49 +452,46 @@ function Index() {
                 </div>
                 {/* About End */}
                 {/* Fact Start */}
-                <div className="container-fluid fact bg-dark my-5 py-5">
+                <div ref={ref} className="container-fluid fact bg-dark my-5 py-5">
                     <div className="container">
                         <div className="row g-4">
-                            <div
-                                className="col-md-6 col-lg-3 text-center wow fadeIn"
-                                data-wow-delay="0.1s"
-                            >
+
+                            {/* 1 */}
+                            <div className="col-md-6 col-lg-3 text-center">
                                 <i className="fa fa-check fa-2x text-white mb-3" />
-                                <h2 className="text-white mb-2" data-toggle="counter-up">
-                                    1234
+                                <h2 className="text-white mb-2">
+                                    {inView && <CountUp end={15} duration={2} />}
                                 </h2>
                                 <p className="text-white mb-0">Years Experience</p>
                             </div>
-                            <div
-                                className="col-md-6 col-lg-3 text-center wow fadeIn"
-                                data-wow-delay="0.3s"
-                            >
+
+                            {/* 2 */}
+                            <div className="col-md-6 col-lg-3 text-center">
                                 <i className="fa fa-users-cog fa-2x text-white mb-3" />
-                                <h2 className="text-white mb-2" data-toggle="counter-up">
-                                    1234
+                                <h2 className="text-white mb-2">
+                                    {inView && <CountUp end={25} duration={2} />}
                                 </h2>
                                 <p className="text-white mb-0">Expert Technicians</p>
                             </div>
-                            <div
-                                className="col-md-6 col-lg-3 text-center wow fadeIn"
-                                data-wow-delay="0.5s"
-                            >
+
+                            {/* 3 */}
+                            <div className="col-md-6 col-lg-3 text-center">
                                 <i className="fa fa-users fa-2x text-white mb-3" />
-                                <h2 className="text-white mb-2" data-toggle="counter-up">
-                                    1234
+                                <h2 className="text-white mb-2">
+                                    {inView && <CountUp end={1200} duration={2} />}+
                                 </h2>
                                 <p className="text-white mb-0">Satisfied Clients</p>
                             </div>
-                            <div
-                                className="col-md-6 col-lg-3 text-center wow fadeIn"
-                                data-wow-delay="0.7s"
-                            >
+
+                            {/* 4 */}
+                            <div className="col-md-6 col-lg-3 text-center">
                                 <i className="fa fa-car fa-2x text-white mb-3" />
-                                <h2 className="text-white mb-2" data-toggle="counter-up">
-                                    1234
+                                <h2 className="text-white mb-2">
+                                    {inView && <CountUp end={850} duration={2} />}+
                                 </h2>
-                                <p className="text-white mb-0">Compleate Projects</p>
+                                <p className="text-white mb-0">Completed Projects</p>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -448,8 +500,9 @@ function Index() {
                 <div className="container-xxl service py-5">
                     <div className="container">
                         <div className="text-center wow fadeInUp" data-wow-delay="0.1s">
-                            <h6 className="text-primary text-uppercase">// Pricing Plan //</h6>
-                            <h1 className="mb-5">Pricing Plan</h1>
+                            <h1 className="mb-3">Pricing Plan</h1>
+                            <h6 className="text-primary text-uppercase mb-3">Quality service. Clear pricing.</h6>
+
                         </div>
                         <div className="row g-4 wow fadeInUp" data-wow-delay="0.3s">
                             <div className="col-lg-4">
@@ -461,7 +514,7 @@ function Index() {
                                         type="button"
                                     >
                                         <i className="fa fa-car-side fa-2x me-3" />
-                                        <h4 className="m-0">Diagnostic Test</h4>
+                                        <h4 className="m-0">RoyalZ Tint</h4>
                                     </button>
                                     <button
                                         className="nav-link w-100 d-flex align-items-center text-start p-4 mb-4"
@@ -470,7 +523,7 @@ function Index() {
                                         type="button"
                                     >
                                         <i className="fa fa-car fa-2x me-3" />
-                                        <h4 className="m-0">Engine Servicing</h4>
+                                        <h4 className="m-0">RoyalZ Full Combos</h4>
                                     </button>
                                     <button
                                         className="nav-link w-100 d-flex align-items-center text-start p-4 mb-4"
@@ -479,9 +532,9 @@ function Index() {
                                         type="button"
                                     >
                                         <i className="fa fa-cog fa-2x me-3" />
-                                        <h4 className="m-0">Tires Replacement</h4>
+                                        <h4 className="m-0">RoyalZ Wraps</h4>
                                     </button>
-                                    <button
+                                    {/* <button
                                         className="nav-link w-100 d-flex align-items-center text-start p-4 mb-0"
                                         data-bs-toggle="pill"
                                         data-bs-target="#tab-pane-4"
@@ -489,7 +542,7 @@ function Index() {
                                     >
                                         <i className="fa fa-oil-can fa-2x me-3" />
                                         <h4 className="m-0">Oil Changing</h4>
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
                             <div className="col-lg-8">
@@ -500,38 +553,61 @@ function Index() {
                                                 <div className="position-relative h-100">
                                                     <img
                                                         className="position-absolute img-fluid w-100 h-100"
-                                                        src="img/service-1.jpg"
+                                                        src="img/tint.jpg"
                                                         style={{ objectFit: "cover" }}
                                                         alt=""
                                                     />
                                                 </div>
                                             </div>
                                             <div className="col-md-6">
-                                                <h3 className="mb-3">
-                                                    15 Years Of Experience In Auto Servicing
-                                                </h3>
-                                                <p className="mb-4">
+                                                <h4 className="mb-3">
+                                                    Services Include in package :
+                                                </h4>
+                                                {/* <p className="mb-4">
                                                     Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit.
                                                     Aliqu diam amet diam et eos. Clita erat ipsum et lorem et
                                                     sit, sed stet lorem sit clita duo justo magna dolore erat
                                                     amet
+                                                </p> */}
+                                                <p>
+                                                    <i className="fa fa-check text-success me-3" />
+                                                    Full Sedan
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Quality Servicing
+                                                    Full SUV
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Expert Workers
+                                                    Sedan (Rear Half of the Car)
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Modern Equipment
+                                                    Headlights Tint
+
                                                 </p>
-                                                <a href="" className="btn btn-primary py-3 px-5 mt-3">
-                                                    Read More
-                                                    <i className="fa fa-arrow-right ms-3" />
-                                                </a>
+                                                <p>
+                                                    <i className="fa fa-check text-success me-3" />
+                                                    Taillights Tint
+
+                                                </p>
+                                                <div className="d-flex justify-content-between align-items-center mt-4">
+
+                                                    {/* Price */}
+                                                    <div className="mb-4">
+                                                        <small className="text-muted">Starting from</small>
+                                                        <h3 className="mb-0 text-primary">$99</h3>
+                                                    </div>
+
+                                                    {/* Button */}
+                                                    <a href="" className="btn btn-primary py-2 px-4 py-2">
+                                                        Book Now <i className="fa fa-arrow-right ms-2" />
+                                                    </a>
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -541,38 +617,64 @@ function Index() {
                                                 <div className="position-relative h-100">
                                                     <img
                                                         className="position-absolute img-fluid w-100 h-100"
-                                                        src="img/service-2.jpg"
+                                                        src="img/interior.jpg"
                                                         style={{ objectFit: "cover" }}
                                                         alt=""
                                                     />
                                                 </div>
                                             </div>
                                             <div className="col-md-6">
-                                                <h3 className="mb-3">
-                                                    15 Years Of Experience In Auto Servicing
-                                                </h3>
-                                                <p className="mb-4">
+                                                <h4 className="mb-3">
+                                                    Services Include in package :
+                                                </h4>
+                                                {/* <p className="mb-4">
                                                     Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit.
                                                     Aliqu diam amet diam et eos. Clita erat ipsum et lorem et
                                                     sit, sed stet lorem sit clita duo justo magna dolore erat
                                                     amet
+                                                </p> */}
+                                                <p>
+                                                    <i className="fa fa-check text-success me-3" />
+                                                    Full Car Detailing
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Quality Servicing
+                                                    Full Interior Detailing (Including Seat Cleaning)
+
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Expert Workers
+                                                    Interior Detailing (Without Seat Cleaning)
+
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Modern Equipment
+                                                    Full Exterior Cleaning Supreme Combo Pack
+
+
                                                 </p>
-                                                <a href="" className="btn btn-primary py-3 px-5 mt-3">
-                                                    Read More
-                                                    <i className="fa fa-arrow-right ms-3" />
-                                                </a>
+                                                <p>
+                                                    <i className="fa fa-check text-success me-3" />
+                                                    Full Interior Cleaning Supreme Combo Pack
+
+                                                </p>
+                                                <div className="d-flex justify-content-between align-items-center mt-4">
+
+                                                    {/* Price */}
+                                                    <div className="mb-4">
+                                                        <small className="text-muted">Starting from</small>
+                                                        <h3 className="mb-0 text-primary">$120</h3>
+                                                    </div>
+
+                                                    {/* Button */}
+                                                    <a href="" className="btn btn-primary py-2 px-4 py-2">
+                                                        Book Now <i className="fa fa-arrow-right ms-2" />
+                                                    </a>
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -582,42 +684,66 @@ function Index() {
                                                 <div className="position-relative h-100">
                                                     <img
                                                         className="position-absolute img-fluid w-100 h-100"
-                                                        src="img/service-3.jpg"
+                                                        src="img/wrap.jpg"
                                                         style={{ objectFit: "cover" }}
                                                         alt=""
                                                     />
                                                 </div>
                                             </div>
                                             <div className="col-md-6">
-                                                <h3 className="mb-3">
-                                                    15 Years Of Experience In Auto Servicing
-                                                </h3>
-                                                <p className="mb-4">
+                                                <h4 className="mb-3">
+                                                    Services Include in package :
+                                                </h4>
+                                                {/* <p className="mb-4">
                                                     Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit.
                                                     Aliqu diam amet diam et eos. Clita erat ipsum et lorem et
                                                     sit, sed stet lorem sit clita duo justo magna dolore erat
                                                     amet
+                                                </p> */}
+                                                <p>
+                                                    <i className="fa fa-check text-success me-3" />
+                                                    Hood
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Quality Servicing
+                                                    Roof
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Expert Workers
+                                                    Front Bumper
+
                                                 </p>
                                                 <p>
                                                     <i className="fa fa-check text-success me-3" />
-                                                    Modern Equipment
+                                                    Rear Bumper
+
                                                 </p>
-                                                <a href="" className="btn btn-primary py-3 px-5 mt-3">
-                                                    Read More
-                                                    <i className="fa fa-arrow-right ms-3" />
-                                                </a>
+                                                <p>
+                                                    <i className="fa fa-check text-success me-3" />
+                                                    Full Car Wrap
+
+
+                                                </p>
+                                                <div className="d-flex justify-content-between align-items-center mt-4">
+
+                                                    {/* Price */}
+                                                    <div className="mb-4">
+                                                        <small className="text-muted">Starting from</small>
+                                                        <h3 className="mb-0 text-primary">$150</h3>
+                                                    </div>
+
+                                                    {/* Button */}
+                                                    <a href="" className="btn btn-primary py-2 px-4 py-2">
+                                                        Book Now <i className="fa fa-arrow-right ms-2" />
+                                                    </a>
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="tab-pane fade" id="tab-pane-4">
+                                    {/* <div className="tab-pane fade" id="tab-pane-4">
                                         <div className="row g-4">
                                             <div className="col-md-6" style={{ minHeight: 350 }}>
                                                 <div className="position-relative h-100">
@@ -657,7 +783,7 @@ function Index() {
                                                 </a>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         </div>
@@ -677,11 +803,10 @@ function Index() {
                                         Certified and Award Winning Car Repair Service Provider
                                     </h1>
                                     <p className="text-white mb-0">
-                                        Eirmod sed tempor lorem ut dolores. Aliquyam sit sadipscing kasd
-                                        ipsum. Dolor ea et dolore et at sea ea at dolor, justo ipsum duo
-                                        rebum sea invidunt voluptua. Eos vero eos vero ea et dolore eirmod
-                                        et. Dolores diam duo invidunt lorem. Elitr ut dolores magna sit.
-                                        Sea dolore sanctus sed et. Takimata takimata sanctus sed.
+                                        <p>
+                                            We provide high-end auto detailing services tailored to keep your vehicle looking brand new.
+                                            Our expert team uses advanced techniques and premium products to ensure unmatched shine, protection, and care.
+                                        </p>
                                     </p>
                                 </div>
                             </div>
@@ -690,7 +815,7 @@ function Index() {
                                     className="bg-primary h-100 d-flex flex-column justify-content-center text-center p-5 wow zoomIn"
                                     data-wow-delay="0.6s"
                                 >
-                                    <h1 className="text-white mb-4">Book For A Service</h1>
+                                    <h1 className="text-white mb-4">Any Query? Contact us</h1>
                                     <form>
                                         <div className="row g-3">
                                             <div className="col-12 col-sm-6">
@@ -714,10 +839,10 @@ function Index() {
                                                     className="form-select border-0"
                                                     style={{ height: 55 }}
                                                 >
-                                                    <option selected="">Select A Service</option>
-                                                    <option value={1}>Service 1</option>
-                                                    <option value={2}>Service 2</option>
-                                                    <option value={3}>Service 3</option>
+                                                    <option selected="">Select Service</option>
+                                                    <option value={1}>Royalz Tint</option>
+                                                    <option value={2}>Royalz Full Combo</option>
+                                                    <option value={3}>Royalz Wrap</option>
                                                 </select>
                                             </div>
                                             <div className="col-12 col-sm-6">
@@ -759,98 +884,87 @@ function Index() {
                 <div className="container-xxl py-5">
                     <div className="container">
                         <div className="text-center wow fadeInUp" data-wow-delay="0.1s">
-                            <h6 className="text-primary text-uppercase">// Our Technicians //</h6>
-                            <h1 className="mb-5">Our Expert Technicians</h1>
+                            <h1 className="mb-5">Premium Services for Every Vehicle</h1>
+                            <h6 className="text-primary text-uppercase">From cars to fleets, we deliver professional detailing and protection services tailored to your needs.</h6>
+
                         </div>
-                        <div className="row g-4">
-                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                                <div className="team-item">
-                                    <div className="position-relative overflow-hidden">
-                                        <img className="img-fluid" src="img/team-1.jpg" alt="" />
-                                        <div className="team-overlay position-absolute start-0 top-0 w-100 h-100">
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-facebook-f" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-twitter" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-instagram" />
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div className="bg-light text-center p-4">
-                                        <h5 className="fw-bold mb-0">Full Name</h5>
-                                        <small>Designation</small>
-                                    </div>
-                                </div>
+                        <div className="row mt-4 align-items-center">
+
+                            {/* LEFT THUMBNAILS */}
+                            <div className="col-4 col-sm-2 d-flex flex-column gap-3">
+                                {galleryData.map((item, index) => (
+                                    <img
+                                        key={index}
+                                        src={item.img}
+                                        alt="thumb"
+                                        onClick={() => setActiveIndex(index)}
+                                        className={`img-fluid rounded ${activeIndex === index ? "border border-danger border-3" : ""
+                                            }`}
+                                        style={{
+                                            cursor: "pointer",
+                                            height: "70px",
+                                            objectFit: "cover"
+                                        }}
+                                    />
+                                ))}
                             </div>
-                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                                <div className="team-item">
-                                    <div className="position-relative overflow-hidden">
-                                        <img className="img-fluid" src="img/team-2.jpg" alt="" />
-                                        <div className="team-overlay position-absolute start-0 top-0 w-100 h-100">
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-facebook-f" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-twitter" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-instagram" />
-                                            </a>
-                                        </div>
+
+                            {/* RIGHT CONTENT */}
+                            <div className="col-8 col-sm-10">
+
+                                <div className="row align-items-center">
+
+                                    {/* LEFT TEXT (NEW) */}
+                                    <div className="col-md-5 mb-3 mb-md-0">
+
+                                        <h3 className="fw-bold mb-3">
+                                            {galleryData[activeIndex].title}
+                                        </h3>
+
+                                        <p className="text-muted">
+                                            {galleryData[activeIndex].desc}
+                                        </p>
+
+                                        <a href="#" className="btn btn-primary mt-2">
+                                            Explore Service →
+                                        </a>
+
                                     </div>
-                                    <div className="bg-light text-center p-4">
-                                        <h5 className="fw-bold mb-0">Full Name</h5>
-                                        <small>Designation</small>
+
+                                    {/* RIGHT IMAGE */}
+                                    <div className="col-md-7 position-relative">
+
+                                        <img
+                                            key={activeIndex}
+                                            src={galleryData[activeIndex].img}
+                                            alt="main"
+                                            className="img-fluid rounded w-100 fade-image"
+                                            style={{
+                                                height: "350px",
+                                                objectFit: "cover"
+                                            }}
+                                        />
+
+                                        {/* OPTIONAL SMALL OVERLAY (BOTTOM ONLY) */}
+                                        {/* <div
+                                            className="position-absolute bottom-0 start-0 w-100 p-3"
+                                            style={{
+                                                background: "rgba(0,0,0,0.5)",
+                                                borderBottomLeftRadius: "8px",
+                                                borderBottomRightRadius: "8px"
+                                            }}
+                                        >
+                                            <small className="text-white">
+                                                {galleryData[activeIndex].title}
+                                            </small>
+                                        </div> */}
+
                                     </div>
+
                                 </div>
+
                             </div>
-                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                                <div className="team-item">
-                                    <div className="position-relative overflow-hidden">
-                                        <img className="img-fluid" src="img/team-3.jpg" alt="" />
-                                        <div className="team-overlay position-absolute start-0 top-0 w-100 h-100">
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-facebook-f" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-twitter" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-instagram" />
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div className="bg-light text-center p-4">
-                                        <h5 className="fw-bold mb-0">Full Name</h5>
-                                        <small>Designation</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
-                                <div className="team-item">
-                                    <div className="position-relative overflow-hidden">
-                                        <img className="img-fluid" src="img/team-4.jpg" alt="" />
-                                        <div className="team-overlay position-absolute start-0 top-0 w-100 h-100">
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-facebook-f" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-twitter" />
-                                            </a>
-                                            <a className="btn btn-square mx-1" href="">
-                                                <i className="fab fa-instagram" />
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div className="bg-light text-center p-4">
-                                        <h5 className="fw-bold mb-0">Full Name</h5>
-                                        <small>Designation</small>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -859,8 +973,8 @@ function Index() {
                 <div className="container-xxl py-5">
                     <div className="container">
                         <div className="text-center">
-                            <h6 className="text-primary text-uppercase">// Testimonial //</h6>
-                            <h1 className="mb-5">Our Clients Say!</h1>
+                            {/* <h6 className="text-primary text-uppercase">// Testimonial //</h6> */}
+                            <h1 className="mb-5">Trusted by Our Customers”</h1>
                         </div>
 
                         <Swiper
@@ -886,11 +1000,14 @@ function Index() {
                                         style={{ width: 80, height: 80 }}
                                         alt=""
                                     />
-                                    <h5 className="mb-0">Client Name</h5>
-                                    <p>Profession</p>
+                                    <h5 className="mb-0">Rishu</h5>
+                                    {/* <p>Profession</p> */}
                                     <div className="testimonial-text text-center p-4">
+                                        <div class="mb-2 text-warning">
+                                            ★★★★★
+                                        </div>
                                         <p className="mb-0">
-                                            Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet.
+                                            Had an amazing experience at Royalz Auto Detailing. A big shoutout to Baldeep and Simmu for doing a phenomenal job on my car.
                                         </p>
                                     </div>
                                 </div>
@@ -905,11 +1022,14 @@ function Index() {
                                         style={{ width: 80, height: 80 }}
                                         alt=""
                                     />
-                                    <h5 className="mb-0">Client Name</h5>
-                                    <p>Profession</p>
+                                    <h5 className="mb-0">Johnsondeep Singh</h5>
+                                    {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
+                                        <div class="mb-2 text-warning">
+                                            ★★★★★
+                                        </div>
                                         <p className="mb-0">
-                                            Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet.
+                                            Very good service! I got full car deep cleaning and ceramic coating done. The results were excellent and I’m really satisfied.
                                         </p>
                                     </div>
                                 </div>
@@ -924,11 +1044,14 @@ function Index() {
                                         style={{ width: 80, height: 80 }}
                                         alt=""
                                     />
-                                    <h5 className="mb-0">Client Name</h5>
-                                    <p>Profession</p>
+                                    <h5 className="mb-0">Kiranpreet Singh"</h5>
+                                    {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
+                                        <div class="mb-2 text-warning">
+                                            ★★★★★
+                                        </div>
                                         <p className="mb-0">
-                                            Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet.
+                                            Royalz Auto Detailing is hands down the best in Halifax! They transformed my car inside and out—it looks brand new.
                                         </p>
                                     </div>
                                 </div>
@@ -943,11 +1066,14 @@ function Index() {
                                         style={{ width: 80, height: 80 }}
                                         alt=""
                                     />
-                                    <h5 className="mb-0">Client Name</h5>
-                                    <p>Profession</p>
+                                    <h5 className="mb-0">Ian David Cowan</h5>
+                                    {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
+                                        <div class="mb-2 text-warning">
+                                            ★★★★★
+                                        </div>
                                         <p className="mb-0">
-                                            Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit diam amet.
+                                            I recently purchased a used car that wasn’t properly detailed, but Royalz Auto Detailing completely turned it around.
                                         </p>
                                     </div>
                                 </div>
@@ -967,8 +1093,8 @@ function Index() {
                             <div className="col-lg-3 col-md-6">
                                 <h4 className="text-light mb-4">Contact</h4>
                                 <p className="mb-2"><i className="fa fa-map-marker-alt me-3" />90 horseshoe lake drive Halifax B3S0B4</p>
-                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />Phone: +1 (782) 882-0667</p>
-                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />Phone: +1 (902) 412-2913</p>
+                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />+1 (782) 882-0667</p>
+                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />+1 (902) 412-2913</p>
                                 <div className="d-flex pt-2 mb-2">
                                     <a className="btn btn-outline-light btn-social" href="">
                                         <i className="fab fa-twitter" />
@@ -987,14 +1113,20 @@ function Index() {
                                     <i className="fas fa-user-shield me-2"></i>Admin Login
                                 </a>
                             </div>
-                            <div className="col-lg-3 col-md-6">
-                                <h4 className="text-light mb-4">Useful links</h4>
-                                <ul className="list-unstyled">
-                                    <li><a className="text-light" href="/">Home</a></li>
-                                    <li><a className="text-light" href="/about">About Us</a></li>
-                                    <li><a className="text-light" href="/services">Services</a></li>
-                                    <li><a className="text-light" href="/contact">Contact</a></li>
-                                </ul>
+                            <div class="col-lg-3 col-md-6">
+                                <h4 class="text-light mb-4">Opening Hours</h4>
+                                <h6 class="text-light">Monday - Friday:</h6>
+                                <p class="mb-4">09.00 AM - 09.00 PM</p>
+                                <h6 class="text-light">Saturday - Sunday:</h6>
+                                <p class="mb-0">09.00 AM - 12.00 PM</p>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <h4 class="text-light mb-4">Services</h4>
+                                <a class="btn btn-link" href="">Diagnostic Test</a>
+                                <a class="btn btn-link" href="">Engine Servicing</a>
+                                <a class="btn btn-link" href="">Tires Replacement</a>
+                                <a class="btn btn-link" href="">Oil Changing</a>
+                                <a class="btn btn-link" href="">Vacuam Cleaning</a>
                             </div>
                             <div className="col-lg-3 col-md-6">
                                 <h4 className="text-light mb-4">Newsletter</h4>
@@ -1011,13 +1143,13 @@ function Index() {
                     <div className="container">
                         <div className="copyright">
                             <div className="row">
-                                <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                                {/* <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
                                     ©{" "}
                                     <a className="border-bottom" href="#">
                                         Your Site Name
                                     </a>
                                     , All Right Reserved.
-                                    {/*/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. *** /*/}
+                                     This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. 
                                     Designed By{" "}
                                     <a className="border-bottom" href="https://htmlcodex.com">
                                         HTML Codex
@@ -1031,8 +1163,8 @@ function Index() {
                                     >
                                         ThemeWagon
                                     </a>
-                                </div>
-                                <div className="col-md-6 text-center text-md-end">
+                                </div> */}
+                                <div className="col-md-12 text-end text-md-end">
                                     <div className="footer-menu">
                                         <a href="">Home</a>
                                         <a href="">Cookies</a>
