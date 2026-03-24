@@ -482,3 +482,141 @@
 .service .d-flex {
     display: block !important;
 }
+.fade-image {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.service-card {
+  border: 2px solid var(--light);
+  border-radius: 12px;
+  background: #fff;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.service-card h5 {
+  color: var(--secondary); /* BLUE */
+  font-weight: 600;
+}
+
+.service-card small {
+  color: #666;
+}
+
+/* 🔥 HOVER */
+.service-card:hover {
+  border-color: var(--primary); /* RED */
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* 🔥 SELECTED */
+.service-card.active {
+  border-color: var(--primary);
+  background: rgba(216, 19, 36, 0.05);
+}
+.bg-dark {
+  background: var(--dark) !important;
+}
+
+.sidebar-title {
+  color: var(--secondary); /* BLUE */
+}
+
+.step-active {
+  color: var(--primary); /* RED */
+  font-weight: 600;
+}
+.btn-danger {
+  background: var(--primary);
+  border: none;
+}
+
+.btn-danger:hover {
+  background: #b0101d;
+}
+.package-card {
+  border: 2px solid var(--light);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+  background: #fff;
+}
+
+.package-card:hover {
+  border-color: var(--primary);
+}
+
+.package-card.active {
+  border-color: var(--primary);
+  background: rgba(216, 19, 36, 0.05);
+}
+
+.package-card strong {
+  color: var(--primary);
+}
+.time-slot {
+  padding: 10px 20px;
+  border: 2px solid var(--light);
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.time-slot:hover {
+  border-color: var(--primary);
+}
+
+.time-slot.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.1rem rgba(216, 19, 36, 0.2);
+}
+.cart-card {
+  border: 2px solid #28a745;
+  border-radius: 12px;
+  background: #fff;
+  transition: 0.3s;
+}
+
+.cart-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+.summary-card {
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #eee;
+}
+
+.total-box {
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 8px;
+}
+
+.confirm-box {
+  border: 2px dashed #ddd;
+  padding: 40px;
+  border-radius: 12px;
+}
