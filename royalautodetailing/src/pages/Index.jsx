@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import { Link } from "react-router-dom";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "./home.css";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
+import SiteFooter from "../components/SiteFooter";
+import SiteHeader from "../components/SiteHeader";
 
 function Index() {
+    const scrollToPricingPlan = () => {
+        const pricingSection = document.getElementById("pricing-plan");
+
+        if (pricingSection) {
+            pricingSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    };
+
     // Check admin login status
     const galleryData = [
         {
@@ -89,119 +100,9 @@ function Index() {
             )}
             <>
 
-                {/* Topbar Start */}
-                <div className="container-fluid bg-light p-0">
-                    <div className="row gx-0 d-none d-lg-flex">
-                        <div className="col-lg-7 px-5 text-start">
-                            <div className="h-100 d-inline-flex align-items-center py-3 me-4">
-                                <small className="fa fa-map-marker-alt text-primary me-2" />
-                                <small>90 horseshoe lake drive Halifax B3S0B4</small>
-                            </div>
-                            <div className="h-100 d-inline-flex align-items-center py-3">
-                                <small className="far fa-clock text-primary me-2" />
-                                <small>+1 (782) 882-0667</small>
-                            </div>
-                        </div>
-                        <div className="col-lg-5 px-5 text-end">
-                            <div className="h-100 d-inline-flex align-items-center py-3 me-4">
-                                <small className="fa fa-phone-alt text-primary me-2" />
-                                <small>+1 (902) 412-2913</small>
-                            </div>
-                            <div className="h-100 d-inline-flex align-items-center">
-                                <a className="btn btn-sm-square bg-white text-primary me-1" href="">
-                                    <i className="fab fa-facebook-f" />
-                                </a>
-                                <a className="btn btn-sm-square bg-white text-primary me-1" href="">
-                                    <i className="fab fa-twitter" />
-                                </a>
-                                <a className="btn btn-sm-square bg-white text-primary me-1" href="">
-                                    <i className="fab fa-linkedin-in" />
-                                </a>
-                                <a className="btn btn-sm-square bg-white text-primary me-0" href="">
-                                    <i className="fab fa-instagram" />
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* Topbar End */}
-                {/* Navbar Start */}
-                <nav className="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-                    <a
-                        href="index.html"
-                        className="navbar-brand d-flex align-items-center px-4 px-lg-5"
-                    >
-                        <a href="/" className="navbar-brand p-0">
-                            <img
-                                src="/img/royallogo.png"
-                                alt="Royal Auto Detailing"
-                                style={{ height: "60px" }}
-                            />
-                        </a>
-                    </a>
-                    <button
-                        type="button"
-                        className="navbar-toggler me-4"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarCollapse"
-                    >
-                        <span className="navbar-toggler-icon" />
-                    </button>
-                    <div className="collapse navbar-collapse" id="navbarCollapse">
-                        <div className="navbar-nav ms-auto p-4 p-lg-0">
-                            <a href="index.html" className="nav-item nav-link active">
-                                Home
-                            </a>
-                            <a href="about.html" className="nav-item nav-link">
-                                About Us
-                            </a>
-                            <a href="service.html" className="nav-item nav-link">
-                                Services
-                            </a>
-                            <div className="nav-item dropdown">
-                                <a
-                                    href="#"
-                                    className="nav-link dropdown-toggle"
-                                    data-bs-toggle="dropdown"
-                                >
-                                    Book Services
-                                </a>
-                                <div className="dropdown-menu fade-up m-0">
-                                    <a href="booking.html" className="dropdown-item">
-                                        Booking
-                                    </a>
-                                    <a href="team.html" className="dropdown-item">
-                                        Technicians
-                                    </a>
-                                    <a href="testimonial.html" className="dropdown-item">
-                                        Testimonial
-                                    </a>
-                                    <a href="404.html" className="dropdown-item">
-                                        404 Page
-                                    </a>
-                                </div>
-                            </div>
-                            <a href="contact.html" className="nav-item nav-link">
-                                Contact Us
-                            </a>
-                            {isAdmin && (
-                                <a href="/admin-dashboard" className="nav-item nav-link text-warning fw-bold">
-                                    <i className="fas fa-user-shield me-2"></i>Admin Dashboard
-                                </a>
-                            )}
-                        </div>
-                        <Link
-                            to="/booking"
-                            className="btn btn-primary py-4 px-lg-5 d-none d-lg-block"
-                        >
-                            Book Now
-                            <i className="fa fa-arrow-right ms-3" />
-                        </Link>
-                    </div>
-                </nav>
-                {/* Navbar End */}
+                <SiteHeader activePage="home" />
                 {/* Carousel Start */}
-                <div className="container-fluid p-0 mb-5">
+                <div className="container-fluid p-0 mb-5 home-hero">
                     <div
                         id="header-carousel"
                         className="carousel slide"
@@ -209,7 +110,7 @@ function Index() {
                     >
                         <div className="carousel-inner">
                             <div className="carousel-item active">
-                                <img className="w-100" src="img/carousel-bg-1.jpg" alt="Image" />
+                                <img className="w-100" src="img/carousel-bg-1.jpg" alt="Royalz Auto Detailing hero background" />
                                 <div className="carousel-caption d-flex align-items-center">
                                     <div className="container">
                                         <div className="row align-items-center justify-content-center justify-content-lg-start">
@@ -221,12 +122,12 @@ function Index() {
                                                 <h6 className="text-white text-uppercase mb-3  animated slideInDown">
                                                     PROFESSIONAL AND FAST AUTO DETAILING SERVICES IN HALIFAX
                                                 </h6>
-                                                <a
-                                                    href=""
+                                                <Link
+                                                    to="/booking"
                                                     className="btn btn-primary py-3 px-5 mt-3 animated slideInDown"
                                                 >
                                                     Book Now
-                                                </a>
+                                                </Link>
                                             </div>
                                             <div className="col-lg-5 d-none d-lg-flex animated zoomIn">
                                                 <img className="img-fluid" src="img/carousel-1.png" alt="" />
@@ -298,7 +199,7 @@ function Index() {
                                     <p>
                                         Protect your car’s paint with advanced ceramic coating for long-lasting shine and protection.
                                     </p>
-                                    <a href="#" className="service-link">Learn More →</a>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
                                 </div>
                             </div>
 
@@ -312,7 +213,7 @@ function Index() {
                                     <p>
                                         Improve privacy and reduce heat with premium window tinting services.
                                     </p>
-                                    <a href="#" className="service-link">Learn More →</a>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
                                 </div>
                             </div>
 
@@ -326,7 +227,7 @@ function Index() {
                                     <p>
                                         Custom wraps to transform your car’s look with unique styles and branding.
                                     </p>
-                                    <a href="#" className="service-link">Learn More →</a>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
                                 </div>
                             </div>
 
@@ -340,7 +241,7 @@ function Index() {
                                     <p>
                                         Protect your vehicle from scratches, chips, and damage with high-quality PPF.
                                     </p>
-                                    <a href="#" className="service-link">Learn More →</a>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
                                 </div>
                             </div>
 
@@ -364,7 +265,7 @@ function Index() {
                                         alt=""
                                     />
                                     <div
-                                        className="position-absolute top-0 end-0 mt-n4 me-n4 py-4 px-5"
+                                        className="position-absolute top-0 end-0 mt-n4 me-n4 py-4 px-5 home-about-badge"
                                         style={{ background: "rgba(0, 0, 0, .08)" }}
                                     >
                                         <h1 className="display-4 text-white mb-0">
@@ -442,10 +343,10 @@ function Index() {
                                         </div>
                                     </div>
                                 </div>
-                                <a href="" className="btn btn-primary py-3 px-5">
+                                <Link to="/about" className="btn btn-primary py-3 px-5">
                                     Read More
                                     <i className="fa fa-arrow-right ms-3" />
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -497,7 +398,7 @@ function Index() {
                 </div>
                 {/* Fact End */}
                 {/* Service Start */}
-                <div className="container-xxl service py-5">
+                <div className="container-xxl service py-5" id="pricing-plan">
                     <div className="container">
                         <div className="text-center wow fadeInUp" data-wow-delay="0.1s">
                             <h1 className="mb-3">Pricing Plan</h1>
@@ -603,9 +504,9 @@ function Index() {
                                                     </div>
 
                                                     {/* Button */}
-                                                    <a href="" className="btn btn-primary py-2 px-4 py-2">
+                                                    <Link to="/booking" className="btn btn-primary py-2 px-4 py-2">
                                                         Book Now <i className="fa fa-arrow-right ms-2" />
-                                                    </a>
+                                                    </Link>
 
                                                 </div>
                                             </div>
@@ -670,9 +571,9 @@ function Index() {
                                                     </div>
 
                                                     {/* Button */}
-                                                    <a href="" className="btn btn-primary py-2 px-4 py-2">
+                                                    <Link to="/booking" className="btn btn-primary py-2 px-4 py-2">
                                                         Book Now <i className="fa fa-arrow-right ms-2" />
-                                                    </a>
+                                                    </Link>
 
                                                 </div>
                                             </div>
@@ -735,9 +636,9 @@ function Index() {
                                                     </div>
 
                                                     {/* Button */}
-                                                    <a href="" className="btn btn-primary py-2 px-4 py-2">
+                                                    <Link to="/booking" className="btn btn-primary py-2 px-4 py-2">
                                                         Book Now <i className="fa fa-arrow-right ms-2" />
-                                                    </a>
+                                                    </Link>
 
                                                 </div>
                                             </div>
@@ -803,16 +704,14 @@ function Index() {
                                         Certified and Award Winning Car Repair Service Provider
                                     </h1>
                                     <p className="text-white mb-0">
-                                        <p>
-                                            We provide high-end auto detailing services tailored to keep your vehicle looking brand new.
-                                            Our expert team uses advanced techniques and premium products to ensure unmatched shine, protection, and care.
-                                        </p>
+                                        We provide high-end auto detailing services tailored to keep your vehicle looking brand new.
+                                        Our expert team uses advanced techniques and premium products to ensure unmatched shine, protection, and care.
                                     </p>
                                 </div>
                             </div>
                             <div className="col-lg-6">
                                 <div
-                                    className="bg-primary h-100 d-flex flex-column justify-content-center text-center p-5 wow zoomIn"
+                                    className="bg-primary h-100 d-flex flex-column justify-content-center text-center p-5 wow zoomIn home-contact-card"
                                     data-wow-delay="0.6s"
                                 >
                                     <h1 className="text-white mb-4">Any Query? Contact us</h1>
@@ -837,25 +736,22 @@ function Index() {
                                             <div className="col-12 col-sm-6">
                                                 <select
                                                     className="form-select border-0"
+                                                    defaultValue=""
                                                     style={{ height: 55 }}
                                                 >
-                                                    <option selected="">Select Service</option>
+                                                    <option value="">Select Service</option>
                                                     <option value={1}>Royalz Tint</option>
                                                     <option value={2}>Royalz Full Combo</option>
                                                     <option value={3}>Royalz Wrap</option>
                                                 </select>
                                             </div>
                                             <div className="col-12 col-sm-6">
-                                                <div className="date" id="date1" data-target-input="nearest">
-                                                    <input
-                                                        type="text"
-                                                        className="form-control border-0 datetimepicker-input"
-                                                        placeholder="Service Date"
-                                                        data-target="#date1"
-                                                        data-toggle="datetimepicker"
-                                                        style={{ height: 55 }}
-                                                    />
-                                                </div>
+                                                <input
+                                                    type="date"
+                                                    className="form-control border-0"
+                                                    aria-label="Service Date"
+                                                    style={{ height: 55 }}
+                                                />
                                             </div>
                                             <div className="col-12">
                                                 <textarea
@@ -891,12 +787,12 @@ function Index() {
                         <div className="row mt-4 align-items-center">
 
                             {/* LEFT THUMBNAILS */}
-                            <div className="col-4 col-sm-2 d-flex flex-column gap-3">
+                            <div className="col-12 col-sm-2 d-flex gap-3 home-gallery-thumbs">
                                 {galleryData.map((item, index) => (
                                     <img
                                         key={index}
                                         src={item.img}
-                                        alt="thumb"
+                                        alt={`${item.title} thumbnail`}
                                         onClick={() => setActiveIndex(index)}
                                         className={`img-fluid rounded ${activeIndex === index ? "border border-danger border-3" : ""
                                             }`}
@@ -910,7 +806,7 @@ function Index() {
                             </div>
 
                             {/* RIGHT CONTENT */}
-                            <div className="col-8 col-sm-10">
+                            <div className="col-12 col-sm-10 home-gallery-content">
 
                                 <div className="row align-items-center">
 
@@ -925,9 +821,9 @@ function Index() {
                                             {galleryData[activeIndex].desc}
                                         </p>
 
-                                        <a href="#" className="btn btn-primary mt-2">
+                                        <Link to="/booking" className="btn btn-primary mt-2">
                                             Explore Service →
-                                        </a>
+                                        </Link>
 
                                     </div>
 
@@ -937,8 +833,8 @@ function Index() {
                                         <img
                                             key={activeIndex}
                                             src={galleryData[activeIndex].img}
-                                            alt="main"
-                                            className="img-fluid rounded w-100 fade-image"
+                                            alt={galleryData[activeIndex].title}
+                                            className="img-fluid rounded w-100 fade-image home-gallery-image"
                                             style={{
                                                 height: "350px",
                                                 objectFit: "cover"
@@ -1003,7 +899,7 @@ function Index() {
                                     <h5 className="mb-0">Rishu</h5>
                                     {/* <p>Profession</p> */}
                                     <div className="testimonial-text text-center p-4">
-                                        <div class="mb-2 text-warning">
+                                        <div className="mb-2 text-warning">
                                             ★★★★★
                                         </div>
                                         <p className="mb-0">
@@ -1025,7 +921,7 @@ function Index() {
                                     <h5 className="mb-0">Johnsondeep Singh</h5>
                                     {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
-                                        <div class="mb-2 text-warning">
+                                        <div className="mb-2 text-warning">
                                             ★★★★★
                                         </div>
                                         <p className="mb-0">
@@ -1047,7 +943,7 @@ function Index() {
                                     <h5 className="mb-0">Kiranpreet Singh"</h5>
                                     {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
-                                        <div class="mb-2 text-warning">
+                                        <div className="mb-2 text-warning">
                                             ★★★★★
                                         </div>
                                         <p className="mb-0">
@@ -1069,7 +965,7 @@ function Index() {
                                     <h5 className="mb-0">Ian David Cowan</h5>
                                     {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
-                                        <div class="mb-2 text-warning">
+                                        <div className="mb-2 text-warning">
                                             ★★★★★
                                         </div>
                                         <p className="mb-0">
@@ -1083,100 +979,7 @@ function Index() {
                     </div>
                 </div>
                 {/* Testimonial End */}
-                {/* Footer Start */}
-                <div
-                    className="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn"
-                    data-wow-delay="0.1s"
-                >
-                    <div className="container py-5">
-                        <div className="row g-5">
-                            <div className="col-lg-3 col-md-6">
-                                <h4 className="text-light mb-4">Contact</h4>
-                                <p className="mb-2"><i className="fa fa-map-marker-alt me-3" />90 horseshoe lake drive Halifax B3S0B4</p>
-                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />+1 (782) 882-0667</p>
-                                <p className="mb-2"><i className="fa fa-phone-alt me-3" />+1 (902) 412-2913</p>
-                                <div className="d-flex pt-2 mb-2">
-                                    <a className="btn btn-outline-light btn-social" href="">
-                                        <i className="fab fa-twitter" />
-                                    </a>
-                                    <a className="btn btn-outline-light btn-social" href="">
-                                        <i className="fab fa-facebook-f" />
-                                    </a>
-                                    <a className="btn btn-outline-light btn-social" href="">
-                                        <i className="fab fa-youtube" />
-                                    </a>
-                                    <a className="btn btn-outline-light btn-social" href="">
-                                        <i className="fab fa-linkedin-in" />
-                                    </a>
-                                </div>
-                                <a className="btn btn-warning w-100 mt-2" href="/admin-login">
-                                    <i className="fas fa-user-shield me-2"></i>Admin Login
-                                </a>
-                            </div>
-                            <div class="col-lg-3 col-md-6">
-                                <h4 class="text-light mb-4">Opening Hours</h4>
-                                <h6 class="text-light">Monday - Friday:</h6>
-                                <p class="mb-4">09.00 AM - 09.00 PM</p>
-                                <h6 class="text-light">Saturday - Sunday:</h6>
-                                <p class="mb-0">09.00 AM - 12.00 PM</p>
-                            </div>
-                            <div class="col-lg-3 col-md-6">
-                                <h4 class="text-light mb-4">Services</h4>
-                                <a class="btn btn-link" href="">Diagnostic Test</a>
-                                <a class="btn btn-link" href="">Engine Servicing</a>
-                                <a class="btn btn-link" href="">Tires Replacement</a>
-                                <a class="btn btn-link" href="">Oil Changing</a>
-                                <a class="btn btn-link" href="">Vacuam Cleaning</a>
-                            </div>
-                            <div className="col-lg-3 col-md-6">
-                                <h4 className="text-light mb-4">Newsletter</h4>
-                                <form>
-                                    <input className="form-control mb-2" type="email" placeholder="email" />
-                                    <button className="btn btn-primary w-100" type="submit">Subscribe</button>
-                                </form>
-                            </div>
-                            <div className="col-lg-3 col-md-6">
-                                {/* Removed duplicate newsletter section for clarity */}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="container">
-                        <div className="copyright">
-                            <div className="row">
-                                {/* <div className="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                                    ©{" "}
-                                    <a className="border-bottom" href="#">
-                                        Your Site Name
-                                    </a>
-                                    , All Right Reserved.
-                                     This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. 
-                                    Designed By{" "}
-                                    <a className="border-bottom" href="https://htmlcodex.com">
-                                        HTML Codex
-                                    </a>
-                                    <br />
-                                    Distributed By:{" "}
-                                    <a
-                                        className="border-bottom"
-                                        href="https://themewagon.com"
-                                        target="_blank"
-                                    >
-                                        ThemeWagon
-                                    </a>
-                                </div> */}
-                                <div className="col-md-12 text-end text-md-end">
-                                    <div className="footer-menu">
-                                        <a href="">Home</a>
-                                        <a href="">Cookies</a>
-                                        <a href="">Help</a>
-                                        <a href="">FQAs</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* Footer End */}
+                <SiteFooter />
             </>
 
 
@@ -1186,3 +989,4 @@ function Index() {
 }
 
 export default Index;
+

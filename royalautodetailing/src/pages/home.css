@@ -1,0 +1,61 @@
+/* Home Page Responsive Fixes */
+.home-gallery-thumbs {
+  flex-direction: column;
+}
+
+.home-gallery-content {
+  margin-top: 0;
+}
+
+.service-link-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+@media (max-width: 767.98px) {
+  .home-hero .carousel-caption {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .home-hero .display-3 {
+    font-size: 2.4rem;
+  }
+
+  .home-about-badge {
+    right: 1rem !important;
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    padding: 0.9rem 1.1rem !important;
+  }
+
+  .home-contact-card {
+    padding: 1.75rem !important;
+  }
+
+  .home-gallery-thumbs {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .home-gallery-thumbs img {
+    flex: 0 0 88px;
+    width: 88px;
+  }
+
+  .home-gallery-content {
+    margin-top: 1.25rem;
+  }
+
+  .home-gallery-image {
+    height: 240px !important;
+  }
+
+  .admin-toast {
+    width: calc(100vw - 2rem);
+    padding: 0.9rem 1rem !important;
+    font-size: 0.95rem !important;
+  }
+}
