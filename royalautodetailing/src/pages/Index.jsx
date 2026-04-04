@@ -10,6 +10,7 @@ import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import { isAdminLoggedIn } from "../lib/adminSession";
 
 function Index() {
     const scrollToPricingPlan = () => {
@@ -50,7 +51,7 @@ function Index() {
     ];
 
     const [activeIndex, setActiveIndex] = useState(0);
-    const isAdmin = typeof window !== 'undefined' && localStorage.getItem('isAdmin') === 'true';
+    const isAdmin = isAdminLoggedIn();
     const [showAdminToast, setShowAdminToast] = useState(isAdmin);
 
     useEffect(() => {

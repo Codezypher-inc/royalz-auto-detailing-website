@@ -1,35 +1,10 @@
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
-
-// Dummy customer data
-const customers = [
-  {
-    name: "John Doe",
-    email: "john@example.com",
-    bookingType: "Full Detailing",
-    date: "2026-03-20",
-    time: "10:00 AM",
-    details: "Sedan, Black, Interior+Exterior"
-  },
-  {
-    name: "Jane Smith",
-    email: "jane@example.com",
-    bookingType: "Express Wash",
-    date: "2026-03-21",
-    time: "2:30 PM",
-    details: "SUV, White, Exterior Only"
-  },
-  {
-    name: "Mike Brown",
-    email: "mike@example.com",
-    bookingType: "Ceramic Coating",
-    date: "2026-03-22",
-    time: "9:00 AM",
-    details: "Coupe, Red, Premium Package"
-  }
-];
+import { apiGet, apiPost, apiPut } from "../lib/api";
+import {
+  clearAdminSession,
+  getAdminSession,
+} from "../lib/adminSession";
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -37,11 +12,86 @@ function AdminDashboard() {
   const [email, setEmail] = useState("admin@example.com");
   const [editMode, setEditMode] = useState(false);
   const [tempEmail, setTempEmail] = useState(email);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const adminSession = getAdminSession();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDashboard() {
+      if (!adminSession?.accessToken) {
+        clearAdminSession();
+        navigate("/admin-login");
+        return;
+      }
+
+      try {
+        const response = await apiGet("/api/admin/dashboard", adminSession.accessToken);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setCustomers(response.customers || []);
+        setEmail(response.emailRecipient || "admin@example.com");
+        setTempEmail(response.emailRecipient || "admin@example.com");
+      } catch (apiError) {
+        if (!isMounted) {
+          return;
+        }
+
+        setError(apiError.message);
+
+        if (apiError.message.toLowerCase().includes("session")) {
+          clearAdminSession();
+          navigate("/admin-login");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadDashboard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [adminSession?.accessToken, navigate]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.removeItem("isAdmin");
+    try {
+      if (adminSession?.accessToken) {
+        await apiPost("/api/auth/logout", {}, adminSession.accessToken);
+      }
+    } catch (apiError) {
+      console.error(apiError);
+    }
+
+    clearAdminSession();
     navigate("/");
+  };
+
+  const handleEmailSave = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await apiPut(
+        "/api/admin/email-recipient",
+        { email: tempEmail },
+        adminSession?.accessToken
+      );
+
+      setEmail(response.emailRecipient);
+      setTempEmail(response.emailRecipient);
+      setEditMode(false);
+    } catch (apiError) {
+      setError(apiError.message);
+    }
   };
 
   // Sidebar menu items
@@ -92,6 +142,8 @@ function AdminDashboard() {
           </div>
         </aside>
         <main className="col-12 col-md-9 p-3 p-md-4">
+          {error && <div className="alert alert-danger">{error}</div>}
+          {loading && <div className="alert alert-info">Loading dashboard...</div>}
           {activeMenu === "dashboard" && (
             <>
               <h1 className="mb-4">Dashboard</h1>
@@ -151,7 +203,7 @@ function AdminDashboard() {
               ) : (
                 <form
                   className="d-flex align-items-center"
-                  onSubmit={e => { e.preventDefault(); setEmail(tempEmail); setEditMode(false); }}
+                  onSubmit={handleEmailSave}
                 >
                   <input
                     type="email"
