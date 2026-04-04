@@ -87,7 +87,7 @@ Example values:
 
 ### Backend on Render
 
-The backend lives in [`backend`](./backend) and includes a [`render.yaml`](./render.yaml) file.
+The backend now lives outside the frontend app in [`../backend`](c:\My Data\CZ Projects\royalautodetailing2\backend), and the Render config lives at [`../render.yaml`](c:\My Data\CZ Projects\royalautodetailing2\render.yaml).
 
 Set these environment variables in Render:
 
@@ -103,5 +103,5 @@ Example values:
 
 ### Local development
 
-1. Start the backend from `backend` with `npm install` and `npm start`.
-2. Start the frontend from the project root with `npm install` and `npm start`.
+1. Start the backend from `../backend` with `npm install` and `npm start`.
+2. Start the frontend from `royalautodetailing` with `npm install` and `npm start`.
