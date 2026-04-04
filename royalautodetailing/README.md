@@ -68,3 +68,40 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Split Deployment
+
+This repo is now set up so the frontend can be deployed to Vercel and the backend can be deployed to Render.
+
+### Frontend on Vercel
+
+Set these environment variables in Vercel:
+
+- `REACT_APP_API_BASE_URL`
+- `REACT_APP_PUBLIC_SITE_URL`
+
+Example values:
+
+- `REACT_APP_API_BASE_URL=https://your-render-service.onrender.com`
+- `REACT_APP_PUBLIC_SITE_URL=https://your-vercel-project.vercel.app`
+
+### Backend on Render
+
+The backend lives in [`backend`](./backend) and includes a [`render.yaml`](./render.yaml) file.
+
+Set these environment variables in Render:
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `FRONTEND_URL`
+
+Example values:
+
+- `SUPABASE_URL=https://your-project.supabase.co`
+- `SUPABASE_ANON_KEY=your-supabase-anon-key`
+- `FRONTEND_URL=https://your-vercel-project.vercel.app`
+
+### Local development
+
+1. Start the backend from `backend` with `npm install` and `npm start`.
+2. Start the frontend from the project root with `npm install` and `npm start`.

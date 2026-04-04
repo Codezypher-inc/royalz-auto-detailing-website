@@ -1,7 +1,7 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient";
+import { apiPost } from "../lib/api";
+import { saveAdminSession } from "../lib/adminSession";
 
 function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -15,33 +15,48 @@ function AdminLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setResetMsg("");
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
-      localStorage.setItem("isAdmin", "true");
-      // Redirect to homepage and show hello admin
+    try {
+      const response = await apiPost("/api/auth/login", {
+        email,
+        password,
+      });
+
+      saveAdminSession({
+        accessToken: response.session.access_token,
+        refreshToken: response.session.refresh_token,
+        expiresAt: response.session.expires_at,
+        user: response.user,
+      });
+
       navigate("/");
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleReset = async (e) => {
     e.preventDefault();
     setError("");
+    setResetMsg("");
     setLoading(true);
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/admin-login",
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
+    try {
+      const redirectBase =
+        process.env.REACT_APP_PUBLIC_SITE_URL || window.location.origin;
+
+      await apiPost("/api/auth/reset-password", {
+        email,
+        redirectTo: `${redirectBase}/admin-login`,
+      });
+
       setResetMsg("Password reset email sent. Check your inbox.");
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setLoading(false);
     }
   };
 
