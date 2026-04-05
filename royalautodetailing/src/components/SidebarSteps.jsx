@@ -1,13 +1,7 @@
 export default function SidebarSteps({ step, steps = [] }) {
     return (
-        <div className="col-lg-4 col-xl-3">
+        <div className="col-lg-4 col-xl-3 booking-sidebar-column">
             <aside className="booking-sidebar">
-                <div className="booking-sidebar-brand">
-                    <span className="booking-sidebar-badge">Live Flow</span>
-                    <h5 className="mb-1">ROYALZ</h5>
-                    <p className="mb-0">Premium detailing command center</p>
-                </div>
-
                 <ul className="list-unstyled booking-step-list mb-0">
                     {steps.map((item, i) => (
                         <li
@@ -16,9 +10,8 @@ export default function SidebarSteps({ step, steps = [] }) {
                                 }`}
                         >
                             <span className="booking-step-number">0{i + 1}</span>
-                            <div>
-                                <h6 className="mb-1">{item.title}</h6>
-                                <p className="mb-0">{item.caption}</p>
+                            <div className="booking-step-copy">
+                                <h6 className="mb-0">{item.title}</h6>
                             </div>
                         </li>
                     ))}

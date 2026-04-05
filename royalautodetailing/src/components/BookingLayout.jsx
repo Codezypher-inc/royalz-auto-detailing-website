@@ -51,12 +51,11 @@ export default function BookingLayout() {
                     <div className="row g-0">
                         <SidebarSteps step={step} steps={steps} />
 
-                        <div className="col-lg-8 col-xl-9">
+                        <div className="col-lg-8 col-xl-9 booking-stage-column">
                             <div className="booking-stage">
                                 <div className="booking-stage-header">
                                     <div>
                                         <p className="booking-stage-kicker">Current Stage</p>
-                                        <h2 className="booking-stage-title">{activeStep.title}</h2>
                                     </div>
                                     <div className="booking-stage-chip">{progress}% synced</div>
                                 </div>
