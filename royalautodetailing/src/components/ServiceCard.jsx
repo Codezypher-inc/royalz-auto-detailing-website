@@ -1,4 +1,4 @@
-export default function ServiceCard({ title, selected, onClick }) {
+export default function ServiceCard({ title, subtitle, selected, onClick }) {
   return (
     <div className="col-md-6 mb-4">
       <div
@@ -8,7 +8,7 @@ export default function ServiceCard({ title, selected, onClick }) {
         onClick={onClick}
       >
         <h5>{title}</h5>
-        <small>Auto Detailing</small>
+        <small>{subtitle || "Auto Detailing"}</small>
       </div>
     </div>
   );

@@ -1,85 +1,91 @@
-import { useState } from "react";
-
-export default function Step5Information({ setStep }) {
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-  });
-
+export default function Step5Information({ booking, onBookingChange, setStep }) {
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    onBookingChange({ [name]: value });
   };
 
   const isValid =
-    form.firstName &&
-    form.lastName &&
-    form.email &&
-    form.phone;
+    booking.firstName &&
+    booking.lastName &&
+    booking.email &&
+    booking.phone;
 
   return (
     <>
       <h4 className="mb-4">Fill Information</h4>
 
       <div className="row">
-
-        {/* First Name */}
         <div className="col-md-6 mb-3">
           <label>First Name *</label>
           <input
             type="text"
             name="firstName"
             className="form-control"
-            value={form.firstName}
+            value={booking.firstName}
             onChange={handleChange}
           />
         </div>
 
-        {/* Last Name */}
         <div className="col-md-6 mb-3">
           <label>Last Name *</label>
           <input
             type="text"
             name="lastName"
             className="form-control"
-            value={form.lastName}
+            value={booking.lastName}
             onChange={handleChange}
           />
         </div>
 
-        {/* Email */}
         <div className="col-md-6 mb-3">
           <label>Email *</label>
           <input
             type="email"
             name="email"
             className="form-control"
-            value={form.email}
+            value={booking.email}
             onChange={handleChange}
           />
         </div>
 
-        {/* Phone */}
         <div className="col-md-6 mb-3">
           <label>Phone *</label>
           <input
             type="text"
             name="phone"
             className="form-control"
-            value={form.phone}
+            value={booking.phone}
             onChange={handleChange}
           />
         </div>
 
+        <div className="col-md-6 mb-3">
+          <label>Vehicle Details</label>
+          <input
+            type="text"
+            name="vehicleDetails"
+            className="form-control"
+            placeholder="Example: 2022 BMW X5, black"
+            value={booking.vehicleDetails}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <label>Additional Notes</label>
+          <input
+            type="text"
+            name="notes"
+            className="form-control"
+            placeholder="Anything we should know before the appointment?"
+            value={booking.notes}
+            onChange={handleChange}
+          />
+        </div>
       </div>
 
-      {/* BUTTONS */}
       <div className="mt-4">
-        <button
-          className="btn btn-secondary me-2"
-          onClick={() => setStep(3)}
-        >
+        <button className="btn btn-secondary me-2" onClick={() => setStep(3)}>
           BACK
         </button>
 
