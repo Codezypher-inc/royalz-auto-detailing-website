@@ -1,36 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiPost } from "../lib/api";
-import { saveAdminSession } from "../lib/adminSession";
+import { useAdminAuth } from "../context/AdminAuthContext";
 
 function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetMsg, setResetMsg] = useState("");
   const navigate = useNavigate();
+  const {
+    isAdmin,
+    isLoading,
+    isRecoveryMode,
+    signInAsAdmin,
+    sendPasswordResetEmail,
+    updateAdminPassword,
+  } = useAdminAuth();
+
+  useEffect(() => {
+    if (!isLoading && isAdmin && !isRecoveryMode) {
+      navigate("/admin-dashboard", { replace: true });
+    }
+  }, [isAdmin, isLoading, isRecoveryMode, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setResetMsg("");
     setLoading(true);
+
     try {
-      const response = await apiPost("/api/auth/login", {
+      await signInAsAdmin({
         email,
         password,
       });
 
-      saveAdminSession({
-        accessToken: response.session.access_token,
-        refreshToken: response.session.refresh_token,
-        expiresAt: response.session.expires_at,
-        user: response.user,
-      });
-
-      navigate("/");
+      navigate("/admin-dashboard", { replace: true });
     } catch (apiError) {
       setError(apiError.message);
     } finally {
@@ -43,15 +51,12 @@ function AdminLogin() {
     setError("");
     setResetMsg("");
     setLoading(true);
+
     try {
       const redirectBase =
         process.env.REACT_APP_PUBLIC_SITE_URL || window.location.origin;
 
-      await apiPost("/api/auth/reset-password", {
-        email,
-        redirectTo: `${redirectBase}/admin-login`,
-      });
-
+      await sendPasswordResetEmail(email, `${redirectBase}/admin-login`);
       setResetMsg("Password reset email sent. Check your inbox.");
     } catch (apiError) {
       setError(apiError.message);
@@ -60,10 +65,76 @@ function AdminLogin() {
     }
   };
 
+  const handlePasswordUpdate = async (e) => {
+    e.preventDefault();
+    setError("");
+    setResetMsg("");
+
+    if (password.length < 8) {
+      setError("Use at least 8 characters for the new password.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await updateAdminPassword(password);
+      setResetMsg("Password updated successfully.");
+      navigate("/admin-dashboard", { replace: true });
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mt-5" style={{ maxWidth: 480 }}>
+        <div className="alert alert-info">Checking your admin session...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mt-5" style={{ maxWidth: 400 }}>
-      <h2 className="mb-4 text-center">Admin Login</h2>
-      {!resetMode ? (
+      <h2 className="mb-4 text-center">
+        {isRecoveryMode ? "Set A New Password" : "Admin Login"}
+      </h2>
+      {isRecoveryMode ? (
+        <form onSubmit={handlePasswordUpdate}>
+          <div className="mb-3">
+            <label className="form-label">New Password</label>
+            <input
+              type="password"
+              className="form-control"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Confirm Password</label>
+            <input
+              type="password"
+              className="form-control"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error && <div className="alert alert-danger">{error}</div>}
+          {resetMsg && <div className="alert alert-success">{resetMsg}</div>}
+          <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+            {loading ? "Saving..." : "Update Password"}
+          </button>
+        </form>
+      ) : !resetMode ? (
         <form onSubmit={handleLogin}>
           <div className="mb-3">
             <label className="form-label">Email</label>
