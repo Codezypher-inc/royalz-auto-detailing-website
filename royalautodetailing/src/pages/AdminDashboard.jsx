@@ -3,6 +3,27 @@ import { useNavigate } from "react-router-dom";
 import { apiGet, apiPut } from "../lib/api";
 import { useAdminAuth } from "../context/AdminAuthContext";
 
+function formatStatusLabel(status) {
+  if (!status) {
+    return "Unknown";
+  }
+
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function statusBadgeClass(status) {
+  switch (status) {
+    case "confirmed":
+      return "bg-primary-subtle text-primary";
+    case "completed":
+      return "bg-success-subtle text-success";
+    case "cancelled":
+      return "bg-danger-subtle text-danger";
+    default:
+      return "bg-warning-subtle text-warning";
+  }
+}
+
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -10,6 +31,13 @@ function AdminDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [tempEmail, setTempEmail] = useState(email);
   const [customers, setCustomers] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    confirmed: 0,
+    completed: 0,
+    cancelled: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { adminUser, isAdmin, isLoading, session, signOutAdmin } = useAdminAuth();
@@ -37,6 +65,15 @@ function AdminDashboard() {
         }
 
         setCustomers(response.customers || []);
+        setStats(
+          response.stats || {
+            total: 0,
+            pending: 0,
+            confirmed: 0,
+            completed: 0,
+            cancelled: 0,
+          }
+        );
         setEmail(response.emailRecipient || "admin@example.com");
         setTempEmail(response.emailRecipient || "admin@example.com");
       } catch (apiError) {
@@ -90,7 +127,7 @@ function AdminDashboard() {
 
   const menuItems = [
     { key: "dashboard", label: "Dashboard", icon: "fas fa-home" },
-    { key: "recent", label: "Recent Customers", icon: "fas fa-users" },
+    { key: "recent", label: "Recent Bookings", icon: "fas fa-calendar-check" },
     { key: "email", label: "Email Recipient", icon: "fas fa-envelope" },
   ];
 
@@ -144,15 +181,93 @@ function AdminDashboard() {
               <h1 className="mb-4">Dashboard</h1>
               <div className="row g-4 mb-4">
                 <div className="col-md-3 col-6">
-                  <div className="bg-white p-4 rounded shadow-sm">
+                  <div className="bg-white p-4 rounded shadow-sm h-100">
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span className="text-secondary">Total Customers</span>
+                      <span className="text-secondary">Total Bookings</span>
                       <span className="bg-primary text-white rounded p-2">
-                        <i className="fas fa-users"></i>
+                        <i className="fas fa-calendar-check"></i>
                       </span>
                     </div>
-                    <h3>{customers.length}</h3>
+                    <h3>{stats.total}</h3>
                   </div>
+                </div>
+                <div className="col-md-3 col-6">
+                  <div className="bg-white p-4 rounded shadow-sm h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="text-secondary">Pending</span>
+                      <span className="bg-warning text-dark rounded p-2">
+                        <i className="fas fa-hourglass-half"></i>
+                      </span>
+                    </div>
+                    <h3>{stats.pending || 0}</h3>
+                  </div>
+                </div>
+                <div className="col-md-3 col-6">
+                  <div className="bg-white p-4 rounded shadow-sm h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="text-secondary">Confirmed</span>
+                      <span className="bg-primary text-white rounded p-2">
+                        <i className="fas fa-check"></i>
+                      </span>
+                    </div>
+                    <h3>{stats.confirmed || 0}</h3>
+                  </div>
+                </div>
+                <div className="col-md-3 col-6">
+                  <div className="bg-white p-4 rounded shadow-sm h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="text-secondary">Completed</span>
+                      <span className="bg-success text-white rounded p-2">
+                        <i className="fas fa-flag-checkered"></i>
+                      </span>
+                    </div>
+                    <h3>{stats.completed || 0}</h3>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded shadow-sm">
+                <h5 className="mb-3">Latest Booking Requests</h5>
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Reference</th>
+                        <th>Customer</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customers.slice(0, 5).map((customer) => (
+                        <tr key={customer.id}>
+                          <td>{customer.reference}</td>
+                          <td>
+                            <div>{customer.name}</div>
+                            <div className="small text-muted">{customer.email}</div>
+                          </td>
+                          <td>
+                            <div>{customer.bookingType}</div>
+                            <div className="small text-muted">{customer.serviceCategory}</div>
+                          </td>
+                          <td>{customer.date} / {customer.time}</td>
+                          <td>
+                            <span className={`badge ${statusBadgeClass(customer.status)}`}>
+                              {formatStatusLabel(customer.status)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                      {customers.length === 0 && (
+                        <tr>
+                          <td colSpan="5" className="text-center text-muted py-4">
+                            No bookings have been submitted yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </>
@@ -164,25 +279,43 @@ function AdminDashboard() {
                 <table className="table table-hover align-middle mb-0">
                   <thead className="table-light">
                     <tr>
+                      <th>Reference</th>
                       <th>Name</th>
                       <th>Email</th>
+                      <th>Phone</th>
                       <th>Booking Type</th>
                       <th>Date</th>
-                      <th>Time</th>
+                      <th>Status</th>
                       <th>Details</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {customers.map((customer, index) => (
-                      <tr key={`${customer.email}-${index}`}>
+                    {customers.map((customer) => (
+                      <tr key={customer.id}>
+                        <td>{customer.reference}</td>
                         <td>{customer.name}</td>
                         <td>{customer.email}</td>
-                        <td>{customer.bookingType}</td>
-                        <td>{customer.date}</td>
-                        <td>{customer.time}</td>
+                        <td>{customer.phone}</td>
+                        <td>
+                          <div>{customer.bookingType}</div>
+                          <div className="small text-muted">{customer.serviceCategory}</div>
+                        </td>
+                        <td>{customer.date} / {customer.time}</td>
+                        <td>
+                          <span className={`badge ${statusBadgeClass(customer.status)}`}>
+                            {formatStatusLabel(customer.status)}
+                          </span>
+                        </td>
                         <td>{customer.details}</td>
                       </tr>
                     ))}
+                    {customers.length === 0 && (
+                      <tr>
+                        <td colSpan="8" className="text-center text-muted py-4">
+                          No bookings have been submitted yet.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -191,6 +324,10 @@ function AdminDashboard() {
           {activeMenu === "email" && (
             <div className="bg-white p-4 rounded shadow-sm mb-4" style={{ maxWidth: 400 }}>
               <h5 className="mb-3">Email Recipient</h5>
+              <p className="text-muted">
+                This address is now stored in Supabase, so it stays consistent across
+                backend restarts and deployments.
+              </p>
               {!editMode ? (
                 <div className="d-flex align-items-center justify-content-between">
                   <span>{email}</span>

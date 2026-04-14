@@ -41,36 +41,6 @@ const supabaseAdmin = createClient(
   }
 );
 
-const adminState = {
-  emailRecipient: "admin@example.com",
-  customers: [
-    {
-      name: "John Doe",
-      email: "john@example.com",
-      bookingType: "Full Detailing",
-      date: "2026-03-20",
-      time: "10:00 AM",
-      details: "Sedan, Black, Interior+Exterior",
-    },
-    {
-      name: "Jane Smith",
-      email: "jane@example.com",
-      bookingType: "Express Wash",
-      date: "2026-03-21",
-      time: "2:30 PM",
-      details: "SUV, White, Exterior Only",
-    },
-    {
-      name: "Mike Brown",
-      email: "mike@example.com",
-      bookingType: "Ceramic Coating",
-      date: "2026-03-22",
-      time: "9:00 AM",
-      details: "Coupe, Red, Premium Package",
-    },
-  ],
-};
-
 app.use(
   cors({
     origin: FRONTEND_URL === "*" ? true : FRONTEND_URL.split(",").map((url) => url.trim()),
@@ -158,6 +128,42 @@ function validateBookingPayload(payload) {
   return null;
 }
 
+async function getAdminSetting(key, fallbackValue = "") {
+  const { data, error } = await supabaseAdmin
+    .from("admin_settings")
+    .select("setting_value")
+    .eq("setting_key", key)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.setting_value || fallbackValue;
+}
+
+async function upsertAdminSetting(key, value) {
+  const { data, error } = await supabaseAdmin
+    .from("admin_settings")
+    .upsert(
+      {
+        setting_key: key,
+        setting_value: value,
+      },
+      {
+        onConflict: "setting_key",
+      }
+    )
+    .select("setting_key, setting_value")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 async function requireAdmin(req, res, next) {
   const accessToken = normalizeAuthToken(req.headers.authorization);
 
@@ -241,26 +247,82 @@ app.get("/api/auth/session", requireAdmin, async (req, res) => {
   });
 });
 
-app.get("/api/admin/dashboard", requireAdmin, (req, res) => {
-  res.json({
-    emailRecipient: adminState.emailRecipient,
-    customers: adminState.customers,
-  });
+app.get("/api/admin/dashboard", requireAdmin, async (req, res) => {
+  try {
+    const [{ data: bookings, error: bookingsError }, emailRecipient] = await Promise.all([
+      supabaseAdmin
+        .from("bookings")
+        .select(
+          "id, reference, status, booking_date, booking_time, package_name, service_category_name, customer_first_name, customer_last_name, customer_email, customer_phone, vehicle_details, notes, created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(50),
+      getAdminSetting("email_recipient", req.adminUser.email || "admin@example.com"),
+    ]);
+
+    if (bookingsError) {
+      throw bookingsError;
+    }
+
+    const formattedBookings = (bookings || []).map((booking) => ({
+      id: booking.id,
+      reference: booking.reference,
+      status: booking.status,
+      name: `${booking.customer_first_name} ${booking.customer_last_name}`.trim(),
+      email: booking.customer_email,
+      phone: booking.customer_phone,
+      bookingType: booking.package_name,
+      serviceCategory: booking.service_category_name,
+      date: booking.booking_date,
+      time: booking.booking_time,
+      details: booking.vehicle_details || booking.notes || "No extra details provided.",
+      createdAt: booking.created_at,
+    }));
+
+    const statusCounts = formattedBookings.reduce(
+      (counts, booking) => {
+        counts.total += 1;
+        counts[booking.status] = (counts[booking.status] || 0) + 1;
+        return counts;
+      },
+      { total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0 }
+    );
+
+    return res.json({
+      emailRecipient,
+      customers: formattedBookings,
+      stats: statusCounts,
+    });
+  } catch (error) {
+    console.error("Unable to load admin dashboard.", error);
+    return res.status(500).json({
+      error:
+        "Unable to load dashboard data. Check the Supabase bookings and admin_settings tables.",
+    });
+  }
 });
 
-app.put("/api/admin/email-recipient", requireAdmin, (req, res) => {
+app.put("/api/admin/email-recipient", requireAdmin, async (req, res) => {
   const { email } = req.body || {};
 
   if (!email) {
     return res.status(400).json({ error: "Email is required." });
   }
 
-  adminState.emailRecipient = email;
+  try {
+    const setting = await upsertAdminSetting("email_recipient", email.trim().toLowerCase());
 
-  return res.json({
-    message: "Email recipient updated.",
-    emailRecipient: adminState.emailRecipient,
-  });
+    return res.json({
+      message: "Email recipient updated.",
+      emailRecipient: setting.setting_value,
+    });
+  } catch (error) {
+    console.error("Unable to update email recipient.", error);
+    return res.status(500).json({
+      error:
+        "Unable to update the email recipient. Check the Supabase admin_settings table.",
+    });
+  }
 });
 
 app.use((err, req, res, next) => {
