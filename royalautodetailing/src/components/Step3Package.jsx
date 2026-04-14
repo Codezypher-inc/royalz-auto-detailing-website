@@ -1,44 +1,45 @@
-import { useState } from "react";
+import { getCategoryById } from "../lib/bookingCatalog";
 
-export default function Step3Package({ setStep }) {
-  const [selected, setSelected] = useState(null);
-
-  const packages = [
-    { name: "Brand New Car", price: 499 },
-    { name: "First Step Paint Correction", price: 650 },
-    { name: "Second Step Paint Correction", price: 850 },
-  ];
+export default function Step3Package({ booking, onBookingChange, setStep }) {
+  const selectedCategory = getCategoryById(booking.categoryId);
+  const selectedPackageId = booking.packageId;
+  const packages = selectedCategory?.packages || [];
 
   return (
     <>
       <h4 className="mb-4">Select Package</h4>
+      <p className="text-muted mb-4">
+        {selectedCategory
+          ? `Available packages for ${selectedCategory.name}.`
+          : "Choose a service category first to view the available packages."}
+      </p>
 
-      {packages.map((pkg, i) => (
+      {packages.map((pkg) => (
         <div
-          key={i}
+          key={pkg.id}
           className={`package-card p-3 mb-3 ${
-            selected === pkg.name ? "active" : ""
+            selectedPackageId === pkg.id ? "active" : ""
           }`}
-          onClick={() => setSelected(pkg.name)}
+          onClick={() => onBookingChange({ packageId: pkg.id })}
         >
-          <div className="d-flex justify-content-between">
-            <span>{pkg.name}</span>
+          <div className="d-flex justify-content-between align-items-start gap-3">
+            <div>
+              <span>{pkg.name}</span>
+              <div className="small text-muted mt-1">{pkg.description}</div>
+            </div>
             <strong>${pkg.price}</strong>
           </div>
         </div>
       ))}
 
-      <button
-        className="btn btn-secondary me-2"
-        onClick={() => setStep(1)}
-      >
+      <button className="btn btn-secondary me-2" onClick={() => setStep(1)}>
         BACK
       </button>
 
       <button
         className="btn btn-danger float-end"
         onClick={() => setStep(3)}
-        disabled={!selected}
+        disabled={!selectedPackageId}
       >
         NEXT STEP
       </button>

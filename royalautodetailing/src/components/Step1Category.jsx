@@ -1,29 +1,32 @@
-import { useState } from "react";
 import ServiceCard from "./ServiceCard";
+import { bookingCatalog } from "../lib/bookingCatalog";
 
-export default function Step2Service({ setStep }) {
-  const [selected, setSelected] = useState(null);
-
-  const services = [
-    "Ceramic Coating",
-    "Tint",
-    "Wraps",
-    "Paint Protection Film (PPF)",
-  ];
+export default function Step1Category({ booking, onBookingChange, setStep }) {
+  const selectedCategory = booking.categoryId;
 
   return (
     <>
       <h4 className="mb-4" style={{ color: "#0f172a" }}>
-        Select Service
+        Select Service Category
       </h4>
+      <p className="text-muted mb-4">
+        Start by choosing the type of service you want to book. We will tailor the
+        next step packages to this selection.
+      </p>
 
       <div className="row">
-        {services.map((s, i) => (
+        {bookingCatalog.map((category) => (
           <ServiceCard
-            key={i}
-            title={s}
-            selected={selected === s}
-            onClick={() => setSelected(s)}
+            key={category.id}
+            title={category.name}
+            subtitle={category.shortLabel}
+            selected={selectedCategory === category.id}
+            onClick={() =>
+              onBookingChange({
+                categoryId: category.id,
+                packageId: "",
+              })
+            }
           />
         ))}
       </div>
@@ -31,7 +34,7 @@ export default function Step2Service({ setStep }) {
       <button
         className="btn btn-danger float-end"
         onClick={() => setStep(2)}
-        disabled={!selected}
+        disabled={!selectedCategory}
       >
         NEXT STEP
       </button>
