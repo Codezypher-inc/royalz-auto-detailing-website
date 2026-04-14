@@ -9,6 +9,12 @@ const PORT = process.env.PORT || 4000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "*";
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const ADMIN_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+);
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in backend environment.");
@@ -68,6 +74,21 @@ function normalizeAuthToken(headerValue) {
   return headerValue.slice("Bearer ".length).trim();
 }
 
+function isAllowedAdmin(user) {
+  const normalizedEmail = user?.email?.trim().toLowerCase();
+
+  if (!normalizedEmail) {
+    return false;
+  }
+
+  if (ADMIN_EMAILS.size === 0) {
+    console.warn("ADMIN_EMAILS is empty. No users will be authorized for admin endpoints.");
+    return false;
+  }
+
+  return ADMIN_EMAILS.has(normalizedEmail);
+}
+
 async function requireAdmin(req, res, next) {
   const accessToken = normalizeAuthToken(req.headers.authorization);
 
@@ -81,6 +102,10 @@ async function requireAdmin(req, res, next) {
     return res.status(401).json({ error: error?.message || "Invalid session." });
   }
 
+  if (!isAllowedAdmin(data.user)) {
+    return res.status(403).json({ error: "This account is not authorized for admin access." });
+  }
+
   req.adminUser = data.user;
   req.accessToken = accessToken;
   return next();
@@ -90,52 +115,6 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, service: "royalz-render-backend" });
 });
 
-app.post("/api/auth/login", async (req, res) => {
-  const { email, password } = req.body || {};
-
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required." });
-  }
-
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error || !data.session || !data.user) {
-    return res.status(401).json({ error: error?.message || "Unable to log in." });
-  }
-
-  return res.json({
-    message: "Login successful.",
-    user: {
-      id: data.user.id,
-      email: data.user.email,
-    },
-    session: {
-      access_token: data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      expires_at: data.session.expires_at,
-      token_type: data.session.token_type,
-    },
-  });
-});
-
-app.post("/api/auth/reset-password", async (req, res) => {
-  const { email, redirectTo } = req.body || {};
-
-  if (!email) {
-    return res.status(400).json({ error: "Email is required." });
-  }
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo,
-  });
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  return res.json({ message: "Password reset email sent." });
-});
-
 app.get("/api/auth/session", requireAdmin, async (req, res) => {
   return res.json({
     user: {
@@ -143,10 +122,6 @@ app.get("/api/auth/session", requireAdmin, async (req, res) => {
       email: req.adminUser.email,
     },
   });
-});
-
-app.post("/api/auth/logout", requireAdmin, async (req, res) => {
-  return res.json({ message: "Logged out." });
 });
 
 app.get("/api/admin/dashboard", requireAdmin, (req, res) => {

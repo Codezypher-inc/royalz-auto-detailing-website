@@ -1,9 +1,9 @@
 import React from "react";
 import { Link, NavLink } from "react-router-dom";
-import { isAdminLoggedIn } from "../lib/adminSession";
+import { useAdminAuth } from "../context/AdminAuthContext";
 
 export default function SiteHeader({ activePage = "" }) {
-  const isAdmin = isAdminLoggedIn();
+  const { isAdmin } = useAdminAuth();
 
   const isActive = (pageName) => (activePage === pageName ? " active" : "");
 
