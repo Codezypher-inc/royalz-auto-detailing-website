@@ -74,6 +74,18 @@ function nextStatusActions(status) {
   }
 }
 
+function formatLeadSource(source) {
+  if (source === "homepage") {
+    return "Homepage";
+  }
+
+  if (source === "contact") {
+    return "Contact Page";
+  }
+
+  return "Unknown";
+}
+
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -81,12 +93,17 @@ function AdminDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [tempEmail, setTempEmail] = useState(email);
   const [customers, setCustomers] = useState([]);
+  const [inquiries, setInquiries] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
     confirmed: 0,
     completed: 0,
     cancelled: 0,
+  });
+  const [inquiryStats, setInquiryStats] = useState({
+    total: 0,
+    new: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -107,6 +124,7 @@ function AdminDashboard() {
 
   const applyDashboardPayload = (response) => {
     setCustomers(response.customers || []);
+    setInquiries(response.inquiries || []);
     setStats(
       response.stats || {
         total: 0,
@@ -114,6 +132,12 @@ function AdminDashboard() {
         confirmed: 0,
         completed: 0,
         cancelled: 0,
+      }
+    );
+    setInquiryStats(
+      response.inquiryStats || {
+        total: 0,
+        new: 0,
       }
     );
     setEmail(response.emailRecipient || "admin@example.com");
@@ -322,6 +346,7 @@ function AdminDashboard() {
   const menuItems = [
     { key: "dashboard", label: "Dashboard", icon: "fas fa-home" },
     { key: "recent", label: "Recent Bookings", icon: "fas fa-calendar-check" },
+    { key: "leads", label: "Lead Inquiries", icon: "fas fa-inbox" },
     { key: "availability", label: "Availability", icon: "fas fa-clock" },
     { key: "email", label: "Email Recipient", icon: "fas fa-envelope" },
   ];
@@ -419,50 +444,99 @@ function AdminDashboard() {
                     <h3>{stats.completed || 0}</h3>
                   </div>
                 </div>
+                <div className="col-md-3 col-6">
+                  <div className="bg-white p-4 rounded shadow-sm h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="text-secondary">New Leads</span>
+                      <span className="bg-info text-white rounded p-2">
+                        <i className="fas fa-inbox"></i>
+                      </span>
+                    </div>
+                    <h3>{inquiryStats.new || 0}</h3>
+                  </div>
+                </div>
               </div>
 
-              <div className="bg-white p-4 rounded shadow-sm">
-                <h5 className="mb-3">Latest Booking Requests</h5>
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Reference</th>
-                        <th>Customer</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {customers.slice(0, 5).map((customer) => (
-                        <tr key={customer.id}>
-                          <td>{customer.reference}</td>
-                          <td>
-                            <div>{customer.name}</div>
-                            <div className="small text-muted">{customer.email}</div>
-                          </td>
-                          <td>
-                            <div>{customer.bookingType}</div>
-                            <div className="small text-muted">{customer.serviceCategory}</div>
-                          </td>
-                          <td>{customer.date} / {customer.time}</td>
-                          <td>
-                            <span className={`badge ${statusBadgeClass(customer.status)}`}>
-                              {formatStatusLabel(customer.status)}
+              <div className="row g-4">
+                <div className="col-xl-7">
+                  <div className="bg-white p-4 rounded shadow-sm h-100">
+                    <h5 className="mb-3">Latest Booking Requests</h5>
+                    <div className="table-responsive">
+                      <table className="table table-hover align-middle mb-0">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Reference</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {customers.slice(0, 5).map((customer) => (
+                            <tr key={customer.id}>
+                              <td>{customer.reference}</td>
+                              <td>
+                                <div>{customer.name}</div>
+                                <div className="small text-muted">{customer.email}</div>
+                              </td>
+                              <td>
+                                <div>{customer.bookingType}</div>
+                                <div className="small text-muted">{customer.serviceCategory}</div>
+                              </td>
+                              <td>{customer.date} / {customer.time}</td>
+                              <td>
+                                <span className={`badge ${statusBadgeClass(customer.status)}`}>
+                                  {formatStatusLabel(customer.status)}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                          {customers.length === 0 && (
+                            <tr>
+                              <td colSpan="5" className="text-center text-muted py-4">
+                                No bookings have been submitted yet.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-xl-5">
+                  <div className="bg-white p-4 rounded shadow-sm h-100">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <h5 className="mb-0">Latest Leads</h5>
+                      <span className="badge bg-info-subtle text-info">
+                        {inquiryStats.total || 0} total
+                      </span>
+                    </div>
+                    <div className="d-flex flex-column gap-3">
+                      {inquiries.slice(0, 4).map((inquiry) => (
+                        <div key={inquiry.id} className="border rounded p-3 bg-light">
+                          <div className="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                              <div className="fw-semibold">{inquiry.name}</div>
+                              <div className="small text-muted">{inquiry.email}</div>
+                            </div>
+                            <span className="badge bg-secondary-subtle text-secondary">
+                              {formatLeadSource(inquiry.source)}
                             </span>
-                          </td>
-                        </tr>
+                          </div>
+                          <div className="small text-muted mt-2">
+                            {inquiry.serviceInterest} | {inquiry.preferredDate}
+                          </div>
+                          <p className="mb-0 mt-2 small">{inquiry.message}</p>
+                        </div>
                       ))}
-                      {customers.length === 0 && (
-                        <tr>
-                          <td colSpan="5" className="text-center text-muted py-4">
-                            No bookings have been submitted yet.
-                          </td>
-                        </tr>
+                      {inquiries.length === 0 && (
+                        <div className="text-muted py-4 text-center">
+                          No inquiries have been submitted yet.
+                        </div>
                       )}
-                    </tbody>
-                  </table>
+                    </div>
+                  </div>
                 </div>
               </div>
             </>
@@ -529,6 +603,56 @@ function AdminDashboard() {
                       <tr>
                         <td colSpan="9" className="text-center text-muted py-4">
                           No bookings have been submitted yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          {activeMenu === "leads" && (
+            <div className="bg-white p-3 rounded shadow-sm mb-4">
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+                <div>
+                  <h5 className="mb-1">Lead Inquiries</h5>
+                  <p className="text-muted mb-0">
+                    Review contact page and homepage inquiries captured in Supabase.
+                  </p>
+                </div>
+                <span className="badge bg-info-subtle text-info px-3 py-2">
+                  {inquiryStats.total || 0} total leads
+                </span>
+              </div>
+              <div className="table-responsive">
+                <table className="table table-hover align-middle mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Source</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Service</th>
+                      <th>Preferred Date</th>
+                      <th>Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {inquiries.map((inquiry) => (
+                      <tr key={inquiry.id}>
+                        <td>{formatLeadSource(inquiry.source)}</td>
+                        <td>{inquiry.name}</td>
+                        <td>{inquiry.email}</td>
+                        <td>{inquiry.phone}</td>
+                        <td>{inquiry.serviceInterest}</td>
+                        <td>{inquiry.preferredDate}</td>
+                        <td>{inquiry.message}</td>
+                      </tr>
+                    ))}
+                    {inquiries.length === 0 && (
+                      <tr>
+                        <td colSpan="7" className="text-center text-muted py-4">
+                          No inquiries have been submitted yet.
                         </td>
                       </tr>
                     )}
