@@ -109,6 +109,18 @@ function normalizeBookingPayload(payload) {
   };
 }
 
+function normalizeInquiryPayload(payload) {
+  return {
+    source: payload?.source?.trim() || "",
+    name: payload?.name?.trim() || "",
+    email: payload?.email?.trim().toLowerCase() || "",
+    phone: payload?.phone?.trim() || "",
+    service: payload?.service?.trim() || "",
+    preferredDate: payload?.preferredDate?.trim() || "",
+    message: payload?.message?.trim() || "",
+  };
+}
+
 function validateBookingPayload(payload) {
   const requiredFields = [
     ["categoryId", "Service category is required."],
@@ -143,6 +155,34 @@ function validateBookingPayload(payload) {
 
   if (!Number.isFinite(payload.packagePrice) || payload.packagePrice < 0) {
     return "Package price must be a valid number.";
+  }
+
+  return null;
+}
+
+function validateInquiryPayload(payload) {
+  if (!["contact", "homepage"].includes(payload.source)) {
+    return "Invalid inquiry source.";
+  }
+
+  if (!payload.name) {
+    return "Name is required.";
+  }
+
+  if (!payload.email) {
+    return "Email is required.";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(payload.email)) {
+    return "Enter a valid email address.";
+  }
+
+  if (!payload.message) {
+    return "Message is required.";
+  }
+
+  if (payload.preferredDate && !isValidDateValue(payload.preferredDate)) {
+    return "Choose a valid preferred date.";
   }
 
   return null;
@@ -343,6 +383,45 @@ app.post("/api/bookings", async (req, res) => {
   return res.status(201).json({
     message: "Booking request saved successfully.",
     booking: data,
+  });
+});
+
+app.post("/api/inquiries", async (req, res) => {
+  const inquiry = normalizeInquiryPayload(req.body || {});
+  const validationError = validateInquiryPayload(inquiry);
+
+  if (validationError) {
+    return res.status(400).json({ error: validationError });
+  }
+
+  const insertPayload = {
+    source: inquiry.source,
+    customer_name: inquiry.name,
+    customer_email: inquiry.email,
+    customer_phone: inquiry.phone || null,
+    service_interest: inquiry.service || null,
+    preferred_date: inquiry.preferredDate || null,
+    message: inquiry.message,
+    status: "new",
+  };
+
+  const { data, error } = await supabaseAdmin
+    .from("inquiries")
+    .insert(insertPayload)
+    .select("id, source, status, created_at")
+    .single();
+
+  if (error) {
+    console.error("Unable to save inquiry.", error);
+    return res.status(500).json({
+      error:
+        "Unable to save the inquiry. Check the Supabase inquiries table and backend configuration.",
+    });
+  }
+
+  return res.status(201).json({
+    message: "Inquiry submitted successfully.",
+    inquiry: data,
   });
 });
 
