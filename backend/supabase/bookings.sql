@@ -20,3 +20,6 @@ create table if not exists public.bookings (
 
 create index if not exists bookings_booking_date_idx on public.bookings (booking_date);
 create index if not exists bookings_customer_email_idx on public.bookings (customer_email);
+create unique index if not exists bookings_active_slot_unique_idx
+on public.bookings (booking_date, booking_time)
+where status in ('pending', 'confirmed', 'completed');

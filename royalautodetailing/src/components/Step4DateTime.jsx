@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { apiGet } from "../lib/api";
+import { bookingTimeSlots } from "../lib/bookingTimeSlots";
 
 function toDateValue(date) {
   const year = date.getFullYear();
@@ -15,14 +17,66 @@ export default function Step4DateTime({ booking, onBookingChange, setStep }) {
     ? new Date(`${booking.bookingDate}T12:00:00`)
     : new Date();
   const [selectedDate, setSelectedDate] = useState(initialDate);
-  const timeSlots = ["09:00", "11:00", "13:00", "15:00"];
+  const [availableSlots, setAvailableSlots] = useState(bookingTimeSlots);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotError, setSlotError] = useState("");
+
+  const formattedDate = useMemo(
+    () => booking.bookingDate || toDateValue(selectedDate),
+    [booking.bookingDate, selectedDate]
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAvailability() {
+      if (!formattedDate) {
+        return;
+      }
+
+      setLoadingSlots(true);
+      setSlotError("");
+
+      try {
+        const response = await apiGet(
+          `/api/booking-availability?date=${encodeURIComponent(formattedDate)}`
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        const nextAvailableSlots = response.availableSlots || [];
+        setAvailableSlots(nextAvailableSlots);
+
+        if (booking.bookingTime && !nextAvailableSlots.includes(booking.bookingTime)) {
+          onBookingChange({ bookingTime: "" });
+        }
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setSlotError(error.message);
+        setAvailableSlots([]);
+      } finally {
+        if (isMounted) {
+          setLoadingSlots(false);
+        }
+      }
+    }
+
+    loadAvailability();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [booking.bookingTime, formattedDate, onBookingChange]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    onBookingChange({ bookingDate: toDateValue(date) });
+    onBookingChange({ bookingDate: toDateValue(date), bookingTime: "" });
   };
-
-  const formattedDate = booking.bookingDate || toDateValue(selectedDate);
 
   return (
     <>
@@ -41,12 +95,20 @@ export default function Step4DateTime({ booking, onBookingChange, setStep }) {
         <div className="col-md-6">
           <h6 className="mb-3">{selectedDate.toDateString()}</h6>
           <p className="text-muted">
-            Choose a preferred studio time. We can follow up if the final slot
-            needs a small adjustment.
+            Choose a preferred studio time. Only currently available slots are shown.
           </p>
 
+          {loadingSlots && <div className="alert alert-info py-2">Checking availability...</div>}
+          {slotError && <div className="alert alert-danger py-2">{slotError}</div>}
+
+          {!loadingSlots && !slotError && availableSlots.length === 0 && (
+            <div className="alert alert-warning py-2">
+              No time slots are available for this date. Please choose another date.
+            </div>
+          )}
+
           <div className="d-flex flex-wrap gap-2">
-            {timeSlots.map((time) => (
+            {availableSlots.map((time) => (
               <button
                 key={time}
                 type="button"

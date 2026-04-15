@@ -2,6 +2,35 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiGet, apiPut } from "../lib/api";
 import { useAdminAuth } from "../context/AdminAuthContext";
+import { bookingTimeSlots } from "../lib/bookingTimeSlots";
+
+function getTodayDateValue() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatSelectedDate(dateValue) {
+  if (!dateValue) {
+    return "Selected date";
+  }
+
+  const parsed = new Date(`${dateValue}T12:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return dateValue;
+  }
+
+  return parsed.toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 function formatStatusLabel(status) {
   if (!status) {
@@ -40,6 +69,18 @@ function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [availabilityDate, setAvailabilityDate] = useState(getTodayDateValue());
+  const [availabilitySlots, setAvailabilitySlots] = useState(
+    bookingTimeSlots.map((time) => ({
+      time,
+      available: true,
+      blockedByAdmin: false,
+      booked: false,
+    }))
+  );
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState("");
+  const [savingSlot, setSavingSlot] = useState("");
   const { adminUser, isAdmin, isLoading, session, signOutAdmin } = useAdminAuth();
 
   useEffect(() => {
@@ -96,6 +137,56 @@ function AdminDashboard() {
     };
   }, [isAdmin, isLoading, navigate, session?.access_token]);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadAvailability() {
+      if (isLoading || !isAdmin || !session?.access_token || !availabilityDate) {
+        return;
+      }
+
+      setAvailabilityLoading(true);
+      setAvailabilityError("");
+
+      try {
+        const response = await apiGet(
+          `/api/admin/availability?date=${encodeURIComponent(availabilityDate)}`,
+          session.access_token
+        );
+
+        if (!isMounted) {
+          return;
+        }
+
+        setAvailabilitySlots(
+          response.slots ||
+            bookingTimeSlots.map((time) => ({
+              time,
+              available: true,
+              blockedByAdmin: false,
+              booked: false,
+            }))
+        );
+      } catch (apiError) {
+        if (!isMounted) {
+          return;
+        }
+
+        setAvailabilityError(apiError.message);
+      } finally {
+        if (isMounted) {
+          setAvailabilityLoading(false);
+        }
+      }
+    }
+
+    loadAvailability();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [availabilityDate, isAdmin, isLoading, session?.access_token]);
+
   const handleLogout = async () => {
     try {
       await signOutAdmin();
@@ -125,9 +216,37 @@ function AdminDashboard() {
     }
   };
 
+  const handleAvailabilityToggle = async (slot) => {
+    if (!session?.access_token) {
+      return;
+    }
+
+    setAvailabilityError("");
+    setSavingSlot(slot.time);
+
+    try {
+      const response = await apiPut(
+        "/api/admin/availability",
+        {
+          bookingDate: availabilityDate,
+          bookingTime: slot.time,
+          isAvailable: !slot.available,
+        },
+        session.access_token
+      );
+
+      setAvailabilitySlots(response.slots || []);
+    } catch (apiError) {
+      setAvailabilityError(apiError.message);
+    } finally {
+      setSavingSlot("");
+    }
+  };
+
   const menuItems = [
     { key: "dashboard", label: "Dashboard", icon: "fas fa-home" },
     { key: "recent", label: "Recent Bookings", icon: "fas fa-calendar-check" },
+    { key: "availability", label: "Availability", icon: "fas fa-clock" },
     { key: "email", label: "Email Recipient", icon: "fas fa-envelope" },
   ];
 
@@ -361,6 +480,94 @@ function AdminDashboard() {
                     Cancel
                   </button>
                 </form>
+              )}
+            </div>
+          )}
+          {activeMenu === "availability" && (
+            <div className="bg-white p-4 rounded shadow-sm mb-4">
+              <div className="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+                <div>
+                  <h5 className="mb-1">Booking Availability</h5>
+                  <p className="text-muted mb-0">
+                    Block or reopen studio time slots. Booked slots stay reserved and stop
+                    showing in the public booking flow automatically.
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="availability-date" className="form-label small text-muted mb-1">
+                    Select date
+                  </label>
+                  <input
+                    id="availability-date"
+                    type="date"
+                    className="form-control"
+                    value={availabilityDate}
+                    min={getTodayDateValue()}
+                    onChange={(e) => setAvailabilityDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="alert alert-light border mb-4">
+                <strong>{formatSelectedDate(availabilityDate)}</strong>
+                <div className="small text-muted mt-1">
+                  Available slots stay bookable. Blocked slots are hidden on the website.
+                  Already-booked slots remain reserved until the booking status changes.
+                </div>
+              </div>
+
+              {availabilityError && <div className="alert alert-danger">{availabilityError}</div>}
+              {availabilityLoading && (
+                <div className="alert alert-info">Loading availability for this date...</div>
+              )}
+
+              {!availabilityLoading && (
+                <div className="row g-3">
+                  {availabilitySlots.map((slot) => {
+                    let stateLabel = "Available";
+                    let stateClass = "bg-success-subtle text-success";
+
+                    if (slot.booked) {
+                      stateLabel = "Booked";
+                      stateClass = "bg-secondary-subtle text-secondary";
+                    } else if (slot.blockedByAdmin) {
+                      stateLabel = "Blocked";
+                      stateClass = "bg-danger-subtle text-danger";
+                    }
+
+                    const buttonLabel = slot.available ? "Block Slot" : "Make Available";
+
+                    return (
+                      <div className="col-sm-6 col-xl-3" key={slot.time}>
+                        <div className="border rounded p-3 h-100 bg-light">
+                          <div className="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                              <div className="fw-semibold">{slot.time}</div>
+                              <div className="small text-muted">
+                                {slot.booked
+                                  ? "Reserved by an active booking"
+                                  : slot.blockedByAdmin
+                                    ? "Hidden from customer booking"
+                                    : "Visible in customer booking"}
+                              </div>
+                            </div>
+                            <span className={`badge ${stateClass}`}>{stateLabel}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className={`btn btn-sm w-100 ${
+                              slot.available ? "btn-outline-danger" : "btn-outline-success"
+                            }`}
+                            onClick={() => handleAvailabilityToggle(slot)}
+                            disabled={slot.booked || savingSlot === slot.time}
+                          >
+                            {savingSlot === slot.time ? "Saving..." : buttonLabel}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           )}

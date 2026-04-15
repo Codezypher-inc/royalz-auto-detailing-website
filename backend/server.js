@@ -16,6 +16,16 @@ const ADMIN_EMAILS = new Set(
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean)
 );
+const DEFAULT_TIME_SLOTS = ["09:00", "11:00", "13:00", "15:00"];
+
+function isValidDateValue(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const parsed = new Date(`${value}T00:00:00`);
+  return !Number.isNaN(parsed.getTime());
+}
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error("Missing SUPABASE_URL or SUPABASE_ANON_KEY in backend environment.");
@@ -121,6 +131,14 @@ function validateBookingPayload(payload) {
     return "Enter a valid email address.";
   }
 
+  if (!isValidDateValue(payload.bookingDate)) {
+    return "Choose a valid booking date.";
+  }
+
+  if (!DEFAULT_TIME_SLOTS.includes(payload.bookingTime)) {
+    return "Choose a valid booking time.";
+  }
+
   if (!Number.isFinite(payload.packagePrice) || payload.packagePrice < 0) {
     return "Package price must be a valid number.";
   }
@@ -164,6 +182,52 @@ async function upsertAdminSetting(key, value) {
   return data;
 }
 
+async function getDateAvailability(date) {
+  const [{ data: overrides, error: overridesError }, { data: bookings, error: bookingsError }] =
+    await Promise.all([
+      supabaseAdmin
+        .from("booking_availability")
+        .select("booking_time, is_available")
+        .eq("booking_date", date),
+      supabaseAdmin
+        .from("bookings")
+        .select("booking_time, status")
+        .eq("booking_date", date)
+        .in("status", ["pending", "confirmed", "completed"]),
+    ]);
+
+  if (overridesError) {
+    throw overridesError;
+  }
+
+  if (bookingsError) {
+    throw bookingsError;
+  }
+
+  const overrideMap = new Map(
+    (overrides || []).map((slot) => [slot.booking_time, slot.is_available])
+  );
+  const bookedSet = new Set((bookings || []).map((booking) => booking.booking_time));
+
+  const slots = DEFAULT_TIME_SLOTS.map((time) => {
+    const blockedByAdmin = overrideMap.get(time) === false;
+    const booked = bookedSet.has(time);
+
+    return {
+      time,
+      available: !blockedByAdmin && !booked,
+      blockedByAdmin,
+      booked,
+    };
+  });
+
+  return {
+    date,
+    slots,
+    availableSlots: slots.filter((slot) => slot.available).map((slot) => slot.time),
+  };
+}
+
 async function requireAdmin(req, res, next) {
   const accessToken = normalizeAuthToken(req.headers.authorization);
 
@@ -190,12 +254,47 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, service: "royalz-render-backend" });
 });
 
+app.get("/api/booking-availability", async (req, res) => {
+  const date = `${req.query.date || ""}`.trim();
+
+  if (!date) {
+    return res.status(400).json({ error: "A booking date is required." });
+  }
+
+  if (!isValidDateValue(date)) {
+    return res.status(400).json({ error: "Enter a valid booking date." });
+  }
+
+  try {
+    const availability = await getDateAvailability(date);
+    return res.json(availability);
+  } catch (error) {
+    console.error("Unable to load booking availability.", error);
+    return res.status(500).json({ error: "Unable to load booking availability." });
+  }
+});
+
 app.post("/api/bookings", async (req, res) => {
   const booking = normalizeBookingPayload(req.body || {});
   const validationError = validateBookingPayload(booking);
 
   if (validationError) {
     return res.status(400).json({ error: validationError });
+  }
+
+  try {
+    const availability = await getDateAvailability(booking.bookingDate);
+
+    if (!availability.availableSlots.includes(booking.bookingTime)) {
+      return res.status(409).json({
+        error: "That date and time is no longer available. Please choose another slot.",
+      });
+    }
+  } catch (error) {
+    console.error("Unable to validate booking availability.", error);
+    return res.status(500).json({
+      error: "Unable to validate booking availability right now. Please try again.",
+    });
   }
 
   const reference = createBookingReference();
@@ -226,6 +325,13 @@ app.post("/api/bookings", async (req, res) => {
 
   if (error) {
     console.error("Unable to save booking.", error);
+
+    if (`${error.message || ""}`.toLowerCase().includes("duplicate")) {
+      return res.status(409).json({
+        error: "That date and time is already booked. Please choose another slot.",
+      });
+    }
+
     return res.status(500).json({
       error:
         "Unable to save the booking. Check the Supabase bookings table and backend service role configuration.",
@@ -299,6 +405,89 @@ app.get("/api/admin/dashboard", requireAdmin, async (req, res) => {
       error:
         "Unable to load dashboard data. Check the Supabase bookings and admin_settings tables.",
     });
+  }
+});
+
+app.get("/api/admin/availability", requireAdmin, async (req, res) => {
+  const date = `${req.query.date || ""}`.trim();
+
+  if (!date) {
+    return res.status(400).json({ error: "A booking date is required." });
+  }
+
+  if (!isValidDateValue(date)) {
+    return res.status(400).json({ error: "Enter a valid booking date." });
+  }
+
+  try {
+    const availability = await getDateAvailability(date);
+    return res.json(availability);
+  } catch (error) {
+    console.error("Unable to load admin availability.", error);
+    return res.status(500).json({ error: "Unable to load availability." });
+  }
+});
+
+app.put("/api/admin/availability", requireAdmin, async (req, res) => {
+  const date = `${req.body?.bookingDate || ""}`.trim();
+  const time = `${req.body?.bookingTime || ""}`.trim();
+  const isAvailable = Boolean(req.body?.isAvailable);
+
+  if (!date || !time) {
+    return res.status(400).json({ error: "Booking date and time are required." });
+  }
+
+  if (!isValidDateValue(date)) {
+    return res.status(400).json({ error: "Enter a valid booking date." });
+  }
+
+  if (!DEFAULT_TIME_SLOTS.includes(time)) {
+    return res.status(400).json({ error: "Invalid booking time." });
+  }
+
+  try {
+    const { data: bookedRow, error: bookingError } = await supabaseAdmin
+      .from("bookings")
+      .select("id")
+      .eq("booking_date", date)
+      .eq("booking_time", time)
+      .in("status", ["pending", "confirmed", "completed"])
+      .maybeSingle();
+
+    if (bookingError) {
+      throw bookingError;
+    }
+
+    if (bookedRow && isAvailable) {
+      return res.status(409).json({
+        error: "That slot is already booked. Update the booking status before reopening it.",
+      });
+    }
+
+    const { error } = await supabaseAdmin.from("booking_availability").upsert(
+      {
+        booking_date: date,
+        booking_time: time,
+        is_available: isAvailable,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "booking_date,booking_time",
+      }
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    const availability = await getDateAvailability(date);
+    return res.json({
+      message: "Availability updated.",
+      ...availability,
+    });
+  } catch (error) {
+    console.error("Unable to update availability.", error);
+    return res.status(500).json({ error: "Unable to update availability." });
   }
 });
 
