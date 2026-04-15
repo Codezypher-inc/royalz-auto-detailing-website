@@ -198,9 +198,9 @@ function Index() {
                                     </div>
                                     <h5>Ceramic Coating</h5>
                                     <p>
-                                        Protect your car’s paint with advanced ceramic coating for long-lasting shine and protection.
+                                        Protect your car's paint with advanced ceramic coating for long-lasting shine and protection.
                                     </p>
-                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More</button>
                                 </div>
                             </div>
 
@@ -214,7 +214,7 @@ function Index() {
                                     <p>
                                         Improve privacy and reduce heat with premium window tinting services.
                                     </p>
-                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More</button>
                                 </div>
                             </div>
 
@@ -226,9 +226,9 @@ function Index() {
                                     </div>
                                     <h5>Vehicle Wraps</h5>
                                     <p>
-                                        Custom wraps to transform your car’s look with unique styles and branding.
+                                        Custom wraps to transform your car's look with unique styles and branding.
                                     </p>
-                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More</button>
                                 </div>
                             </div>
 
@@ -242,7 +242,7 @@ function Index() {
                                     <p>
                                         Protect your vehicle from scratches, chips, and damage with high-quality PPF.
                                     </p>
-                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More →</button>
+                                    <button type="button" className="service-link service-link-button" onClick={scrollToPricingPlan}>Learn More</button>
                                 </div>
                             </div>
 
@@ -335,11 +335,11 @@ function Index() {
                                                 className="bg-light d-flex flex-shrink-0 align-items-center justify-content-center mt-1"
                                                 style={{ width: 45, height: 45 }}
                                             >
-                                                <span className="fw-bold text-secondary">03</span>
+                                                <span className="fw-bold text-secondary">04</span>
                                             </div>
                                             <div className="ps-3">
                                                 <h6>Advanced Equipment</h6>
-                                                <span>Using the latest technology for accurate diagnostics.</span>
+                                                <span>Using modern tools and premium materials for dependable results.</span>
                                             </div>
                                         </div>
                                     </div>
@@ -702,7 +702,7 @@ function Index() {
                             <div className="col-lg-6 py-5">
                                 <div className="py-5">
                                     <h1 className="text-white mb-4">
-                                        Certified and Award Winning Car Repair Service Provider
+                                        Premium auto detailing for drivers who care about the finish
                                     </h1>
                                     <p className="text-white mb-0">
                                         We provide high-end auto detailing services tailored to keep your vehicle looking brand new.
@@ -715,7 +715,7 @@ function Index() {
                                     className="bg-primary h-100 d-flex flex-column justify-content-center text-center p-5 wow zoomIn home-contact-card"
                                     data-wow-delay="0.6s"
                                 >
-                                    <h1 className="text-white mb-4">Any Query? Contact us</h1>
+                                    <h1 className="text-white mb-4">Have a question? Reach out.</h1>
                                     <form>
                                         <div className="row g-3">
                                             <div className="col-12 col-sm-6">
@@ -823,7 +823,7 @@ function Index() {
                                         </p>
 
                                         <Link to="/booking" className="btn btn-primary mt-2">
-                                            Explore Service →
+                                            Explore Service
                                         </Link>
 
                                     </div>
@@ -871,7 +871,7 @@ function Index() {
                     <div className="container">
                         <div className="text-center">
                             {/* <h6 className="text-primary text-uppercase">// Testimonial //</h6> */}
-                            <h1 className="mb-5">Trusted by Our Customers”</h1>
+                            <h1 className="mb-5">Trusted by Our Customers</h1>
                         </div>
 
                         <Swiper
@@ -880,7 +880,7 @@ function Index() {
                             slidesPerView={3}
                             loop={false}
                             autoplay={{ delay: 2500 }}
-                            pagination={{ clickable: true }} // 👈 DOTS
+                            pagination={{ clickable: true }}
                             breakpoints={{
                                 0: { slidesPerView: 1 },
                                 768: { slidesPerView: 2 },
@@ -901,7 +901,7 @@ function Index() {
                                     {/* <p>Profession</p> */}
                                     <div className="testimonial-text text-center p-4">
                                         <div className="mb-2 text-warning">
-                                            ★★★★★
+                                            5/5
                                         </div>
                                         <p className="mb-0">
                                             Had an amazing experience at Royalz Auto Detailing. A big shoutout to Baldeep and Simmu for doing a phenomenal job on my car.
@@ -923,10 +923,10 @@ function Index() {
                                     {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
                                         <div className="mb-2 text-warning">
-                                            ★★★★★
+                                            5/5
                                         </div>
                                         <p className="mb-0">
-                                            Very good service! I got full car deep cleaning and ceramic coating done. The results were excellent and I’m really satisfied.
+                                            Very good service! I got full car deep cleaning and ceramic coating done. The results were excellent and I'm really satisfied.
                                         </p>
                                     </div>
                                 </div>
@@ -941,14 +941,14 @@ function Index() {
                                         style={{ width: 80, height: 80 }}
                                         alt=""
                                     />
-                                    <h5 className="mb-0">Kiranpreet Singh"</h5>
+                                    <h5 className="mb-0">Kiranpreet Singh</h5>
                                     {/* <p>Profession</p> */}
                                     <div className="testimonial-text bg-light text-center p-4">
                                         <div className="mb-2 text-warning">
-                                            ★★★★★
+                                            5/5
                                         </div>
                                         <p className="mb-0">
-                                            Royalz Auto Detailing is hands down the best in Halifax! They transformed my car inside and out—it looks brand new.
+                                            Royalz Auto Detailing is hands down the best in Halifax! They transformed my car inside and out, and it looks brand new.
                                         </p>
                                     </div>
                                 </div>
