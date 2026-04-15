@@ -1,5 +1,7 @@
+import Seo from "../components/Seo";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import { buildLocalBusinessSchema, buildWebPageSchema } from "../lib/seo";
 import "./contact.css";
 
 const contactCards = [
@@ -21,8 +23,28 @@ const contactCards = [
 ];
 
 export default function Contact() {
+  const title = "Contact Royalz Auto Detailing";
+  const description =
+    "Contact Royalz Auto Detailing in Halifax for bookings, service questions, pricing guidance, and premium vehicle care support.";
+
   return (
     <>
+      <Seo
+        title={title}
+        description={description}
+        path="/contact"
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [
+            buildLocalBusinessSchema(),
+            buildWebPageSchema({
+              title,
+              description,
+              path: "/contact",
+            }),
+          ],
+        }}
+      />
       <SiteHeader activePage="contact" />
 
       <section

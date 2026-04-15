@@ -8,11 +8,17 @@ import "swiper/css/pagination";
 import "./home.css";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
+import Seo from "../components/Seo";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { useAdminAuth } from "../context/AdminAuthContext";
+import { buildLocalBusinessSchema, buildWebPageSchema } from "../lib/seo";
 
 function Index() {
+    const title = "Premium Auto Detailing in Halifax";
+    const description =
+        "Royalz Auto Detailing offers premium ceramic coating, tint, wraps, paint protection, and detailing services in Halifax, Nova Scotia.";
+
     const scrollToPricingPlan = () => {
         const pricingSection = document.getElementById("pricing-plan");
 
@@ -69,6 +75,22 @@ function Index() {
 
     return (
         <div>
+            <Seo
+                title={title}
+                description={description}
+                path="/"
+                schema={{
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        buildLocalBusinessSchema(),
+                        buildWebPageSchema({
+                            title,
+                            description,
+                            path: "/",
+                        }),
+                    ],
+                }}
+            />
             {showAdminToast && (
                 <div
                     style={{
