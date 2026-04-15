@@ -149,7 +149,7 @@ export default function About() {
             <div className="row align-items-center g-4">
               <div className="col-lg-8">
                 <span className="about-section-label text-white border-white-25">Ready To Visit</span>
-                <h2 className="text-white mt-3">Let’s get your vehicle booked in for a premium Royalz finish.</h2>
+                <h2 className="text-white mt-3">Let's get your vehicle booked in for a premium Royalz finish.</h2>
                 <p className="text-white-50 mb-0">
                   Start your booking online or reach out if you want help choosing the right service.
                 </p>

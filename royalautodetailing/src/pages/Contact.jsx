@@ -6,7 +6,7 @@ const contactCards = [
   {
     icon: "fa-map-marker-alt",
     title: "Visit Us",
-    detail: "90 horseshoe lake drive, Halifax, NS B3S0B4",
+    detail: "90 Horseshoe Lake Drive, Halifax, NS B3S 0B4",
   },
   {
     icon: "fa-phone-alt",
@@ -35,7 +35,7 @@ export default function Contact() {
           <div className="row align-items-center g-4">
             <div className="col-lg-7">
               <span className="contact-kicker">Contact Royalz</span>
-              <h1 className="contact-title">Let’s talk about your vehicle and the right service for it.</h1>
+              <h1 className="contact-title">Let's talk about your vehicle and the right service for it.</h1>
               <p className="contact-subtitle">
                 Reach out for bookings, pricing questions, service guidance, or anything else you want to clarify before visiting Royalz Auto Detailing.
               </p>
@@ -85,7 +85,7 @@ export default function Contact() {
             <div className="col-lg-6">
               <div className="contact-form-wrap">
                 <span className="contact-section-label">Send A Message</span>
-                <h2 className="mt-3 mb-4">Tell us what you need and we’ll point you in the right direction.</h2>
+                <h2 className="mt-3 mb-4">Tell us what you need and we'll point you in the right direction.</h2>
 
                 <form className="contact-form">
                   <div className="row g-3">

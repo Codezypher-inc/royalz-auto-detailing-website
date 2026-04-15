@@ -2,6 +2,29 @@ import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAdminAuth } from "../context/AdminAuthContext";
 
+const quickLinks = [
+  {
+    href: "https://www.google.com/maps/search/?api=1&query=90+Horseshoe+Lake+Drive+Halifax+NS+B3S+0B4",
+    icon: "fa-map-marker-alt",
+    label: "Directions",
+  },
+  {
+    href: "tel:+17828820667",
+    icon: "fa-phone-alt",
+    label: "Call",
+  },
+  {
+    href: "/contact",
+    icon: "fa-envelope",
+    label: "Contact",
+  },
+  {
+    href: "/booking",
+    icon: "fa-calendar-check",
+    label: "Book",
+  },
+];
+
 export default function SiteHeader({ activePage = "" }) {
   const { isAdmin } = useAdminAuth();
 
@@ -18,27 +41,28 @@ export default function SiteHeader({ activePage = "" }) {
             </div>
             <div className="h-100 d-inline-flex align-items-center py-3">
               <small className="far fa-clock text-primary me-2" />
-              <small>+1 (782) 882-0667</small>
+              <small>Mon - Fri: 9:00 AM - 9:00 PM</small>
             </div>
           </div>
           <div className="col-lg-5 px-5 text-end">
             <div className="h-100 d-inline-flex align-items-center py-3 me-4">
               <small className="fa fa-phone-alt text-primary me-2" />
-              <small>+1 (902) 412-2913</small>
+              <small>+1 (782) 882-0667</small>
             </div>
             <div className="h-100 d-inline-flex align-items-center">
-              <a className="btn btn-sm-square bg-white text-primary me-1" href="/">
-                <i className="fab fa-facebook-f" />
-              </a>
-              <a className="btn btn-sm-square bg-white text-primary me-1" href="/">
-                <i className="fab fa-twitter" />
-              </a>
-              <a className="btn btn-sm-square bg-white text-primary me-1" href="/">
-                <i className="fab fa-linkedin-in" />
-              </a>
-              <a className="btn btn-sm-square bg-white text-primary me-0" href="/">
-                <i className="fab fa-instagram" />
-              </a>
+              {quickLinks.map((item) => (
+                <a
+                  key={item.label}
+                  className="btn btn-sm-square bg-white text-primary me-1"
+                  href={item.href}
+                  target={item.href.startsWith("http") ? "_blank" : undefined}
+                  rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+                  aria-label={item.label}
+                  title={item.label}
+                >
+                  <i className={`fa ${item.icon}`} />
+                </a>
+              ))}
             </div>
           </div>
         </div>
