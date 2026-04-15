@@ -436,11 +436,22 @@ app.get("/api/auth/session", requireAdmin, async (req, res) => {
 
 app.get("/api/admin/dashboard", requireAdmin, async (req, res) => {
   try {
-    const [{ data: bookings, error: bookingsError }, emailRecipient] = await Promise.all([
+    const [
+      { data: bookings, error: bookingsError },
+      { data: inquiries, error: inquiriesError },
+      emailRecipient,
+    ] = await Promise.all([
       supabaseAdmin
         .from("bookings")
         .select(
           "id, reference, status, booking_date, booking_time, package_name, service_category_name, customer_first_name, customer_last_name, customer_email, customer_phone, vehicle_details, notes, created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabaseAdmin
+        .from("inquiries")
+        .select(
+          "id, source, status, customer_name, customer_email, customer_phone, service_interest, preferred_date, message, created_at"
         )
         .order("created_at", { ascending: false })
         .limit(50),
@@ -449,6 +460,10 @@ app.get("/api/admin/dashboard", requireAdmin, async (req, res) => {
 
     if (bookingsError) {
       throw bookingsError;
+    }
+
+    if (inquiriesError) {
+      throw inquiriesError;
     }
 
     const formattedBookings = (bookings || []).map((booking) => ({
@@ -475,16 +490,40 @@ app.get("/api/admin/dashboard", requireAdmin, async (req, res) => {
       { total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0 }
     );
 
+    const formattedInquiries = (inquiries || []).map((inquiry) => ({
+      id: inquiry.id,
+      source: inquiry.source,
+      status: inquiry.status,
+      name: inquiry.customer_name,
+      email: inquiry.customer_email,
+      phone: inquiry.customer_phone || "Not provided",
+      serviceInterest: inquiry.service_interest || "General inquiry",
+      preferredDate: inquiry.preferred_date || "No date requested",
+      message: inquiry.message,
+      createdAt: inquiry.created_at,
+    }));
+
+    const inquiryStats = formattedInquiries.reduce(
+      (counts, inquiry) => {
+        counts.total += 1;
+        counts[inquiry.status] = (counts[inquiry.status] || 0) + 1;
+        return counts;
+      },
+      { total: 0, new: 0 }
+    );
+
     return res.json({
       emailRecipient,
       customers: formattedBookings,
       stats: statusCounts,
+      inquiries: formattedInquiries,
+      inquiryStats,
     });
   } catch (error) {
     console.error("Unable to load admin dashboard.", error);
     return res.status(500).json({
       error:
-        "Unable to load dashboard data. Check the Supabase bookings and admin_settings tables.",
+        "Unable to load dashboard data. Check the Supabase bookings, inquiries, and admin_settings tables.",
     });
   }
 });
