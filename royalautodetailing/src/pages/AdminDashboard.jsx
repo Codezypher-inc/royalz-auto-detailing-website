@@ -53,6 +53,27 @@ function statusBadgeClass(status) {
   }
 }
 
+function nextStatusActions(status) {
+  switch (status) {
+    case "pending":
+      return [
+        { value: "confirmed", label: "Confirm", className: "btn-outline-primary" },
+        { value: "cancelled", label: "Cancel", className: "btn-outline-danger" },
+      ];
+    case "confirmed":
+      return [
+        { value: "completed", label: "Complete", className: "btn-outline-success" },
+        { value: "cancelled", label: "Cancel", className: "btn-outline-danger" },
+      ];
+    case "completed":
+      return [{ value: "cancelled", label: "Cancel", className: "btn-outline-danger" }];
+    case "cancelled":
+      return [{ value: "pending", label: "Reopen", className: "btn-outline-secondary" }];
+    default:
+      return [];
+  }
+}
+
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -81,12 +102,50 @@ function AdminDashboard() {
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
   const [savingSlot, setSavingSlot] = useState("");
+  const [savingBookingId, setSavingBookingId] = useState("");
   const { adminUser, isAdmin, isLoading, session, signOutAdmin } = useAdminAuth();
+
+  const applyDashboardPayload = (response) => {
+    setCustomers(response.customers || []);
+    setStats(
+      response.stats || {
+        total: 0,
+        pending: 0,
+        confirmed: 0,
+        completed: 0,
+        cancelled: 0,
+      }
+    );
+    setEmail(response.emailRecipient || "admin@example.com");
+    setTempEmail(response.emailRecipient || "admin@example.com");
+  };
+
+  const loadDashboard = async () => {
+    const response = await apiGet("/api/admin/dashboard", session.access_token);
+    applyDashboardPayload(response);
+  };
+
+  const loadAvailability = async (dateValue) => {
+    const response = await apiGet(
+      `/api/admin/availability?date=${encodeURIComponent(dateValue)}`,
+      session.access_token
+    );
+
+    setAvailabilitySlots(
+      response.slots ||
+        bookingTimeSlots.map((time) => ({
+          time,
+          available: true,
+          blockedByAdmin: false,
+          booked: false,
+        }))
+    );
+  };
 
   useEffect(() => {
     let isMounted = true;
 
-    async function loadDashboard() {
+    async function bootstrapDashboard() {
       if (isLoading) {
         return;
       }
@@ -105,18 +164,7 @@ function AdminDashboard() {
           return;
         }
 
-        setCustomers(response.customers || []);
-        setStats(
-          response.stats || {
-            total: 0,
-            pending: 0,
-            confirmed: 0,
-            completed: 0,
-            cancelled: 0,
-          }
-        );
-        setEmail(response.emailRecipient || "admin@example.com");
-        setTempEmail(response.emailRecipient || "admin@example.com");
+        applyDashboardPayload(response);
       } catch (apiError) {
         if (!isMounted) {
           return;
@@ -130,7 +178,7 @@ function AdminDashboard() {
       }
     }
 
-    loadDashboard();
+    bootstrapDashboard();
 
     return () => {
       isMounted = false;
@@ -140,7 +188,7 @@ function AdminDashboard() {
   useEffect(() => {
     let isMounted = true;
 
-    async function loadAvailability() {
+    async function refreshAvailability() {
       if (isLoading || !isAdmin || !session?.access_token || !availabilityDate) {
         return;
       }
@@ -180,7 +228,7 @@ function AdminDashboard() {
       }
     }
 
-    loadAvailability();
+    refreshAvailability();
 
     return () => {
       isMounted = false;
@@ -240,6 +288,34 @@ function AdminDashboard() {
       setAvailabilityError(apiError.message);
     } finally {
       setSavingSlot("");
+    }
+  };
+
+  const handleBookingStatusChange = async (bookingId, nextStatus) => {
+    if (!session?.access_token) {
+      return;
+    }
+
+    setError("");
+    setSavingBookingId(bookingId);
+
+    try {
+      await apiPut(
+        `/api/admin/bookings/${bookingId}/status`,
+        { status: nextStatus },
+        session.access_token
+      );
+
+      await loadDashboard();
+
+      if (customers.some((customer) => customer.id === bookingId && customer.date === availabilityDate)) {
+        setAvailabilityError("");
+        await loadAvailability(availabilityDate);
+      }
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setSavingBookingId("");
     }
   };
 
@@ -405,6 +481,7 @@ function AdminDashboard() {
                       <th>Booking Type</th>
                       <th>Date</th>
                       <th>Status</th>
+                      <th>Actions</th>
                       <th>Details</th>
                     </tr>
                   </thead>
@@ -425,12 +502,32 @@ function AdminDashboard() {
                             {formatStatusLabel(customer.status)}
                           </span>
                         </td>
+                        <td>
+                          <div className="d-flex flex-wrap gap-2">
+                            {nextStatusActions(customer.status).map((action) => (
+                              <button
+                                key={action.value}
+                                type="button"
+                                className={`btn btn-sm ${action.className}`}
+                                onClick={() =>
+                                  handleBookingStatusChange(customer.id, action.value)
+                                }
+                                disabled={savingBookingId === customer.id}
+                              >
+                                {savingBookingId === customer.id ? "Saving..." : action.label}
+                              </button>
+                            ))}
+                            {nextStatusActions(customer.status).length === 0 && (
+                              <span className="small text-muted">No actions</span>
+                            )}
+                          </div>
+                        </td>
                         <td>{customer.details}</td>
                       </tr>
                     ))}
                     {customers.length === 0 && (
                       <tr>
-                        <td colSpan="8" className="text-center text-muted py-4">
+                        <td colSpan="9" className="text-center text-muted py-4">
                           No bookings have been submitted yet.
                         </td>
                       </tr>

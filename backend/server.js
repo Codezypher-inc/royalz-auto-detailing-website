@@ -17,6 +17,8 @@ const ADMIN_EMAILS = new Set(
     .filter(Boolean)
 );
 const DEFAULT_TIME_SLOTS = ["09:00", "11:00", "13:00", "15:00"];
+const ACTIVE_BOOKING_STATUSES = ["pending", "confirmed", "completed"];
+const ALL_BOOKING_STATUSES = [...ACTIVE_BOOKING_STATUSES, "cancelled"];
 
 function isValidDateValue(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -193,7 +195,7 @@ async function getDateAvailability(date) {
         .from("bookings")
         .select("booking_time, status")
         .eq("booking_date", date)
-        .in("status", ["pending", "confirmed", "completed"]),
+        .in("status", ACTIVE_BOOKING_STATUSES),
     ]);
 
   if (overridesError) {
@@ -451,7 +453,7 @@ app.put("/api/admin/availability", requireAdmin, async (req, res) => {
       .select("id")
       .eq("booking_date", date)
       .eq("booking_time", time)
-      .in("status", ["pending", "confirmed", "completed"])
+      .in("status", ACTIVE_BOOKING_STATUSES)
       .maybeSingle();
 
     if (bookingError) {
@@ -488,6 +490,66 @@ app.put("/api/admin/availability", requireAdmin, async (req, res) => {
   } catch (error) {
     console.error("Unable to update availability.", error);
     return res.status(500).json({ error: "Unable to update availability." });
+  }
+});
+
+app.put("/api/admin/bookings/:bookingId/status", requireAdmin, async (req, res) => {
+  const bookingId = `${req.params.bookingId || ""}`.trim();
+  const nextStatus = `${req.body?.status || ""}`.trim().toLowerCase();
+
+  if (!bookingId) {
+    return res.status(400).json({ error: "Booking id is required." });
+  }
+
+  if (!ALL_BOOKING_STATUSES.includes(nextStatus)) {
+    return res.status(400).json({ error: "Choose a valid booking status." });
+  }
+
+  try {
+    const { data: existingBooking, error: existingBookingError } = await supabaseAdmin
+      .from("bookings")
+      .select("id, reference, status, booking_date, booking_time")
+      .eq("id", bookingId)
+      .maybeSingle();
+
+    if (existingBookingError) {
+      throw existingBookingError;
+    }
+
+    if (!existingBooking) {
+      return res.status(404).json({ error: "Booking not found." });
+    }
+
+    const { data: updatedBooking, error: updateError } = await supabaseAdmin
+      .from("bookings")
+      .update({ status: nextStatus })
+      .eq("id", bookingId)
+      .select("id, reference, status, booking_date, booking_time")
+      .single();
+
+    if (updateError) {
+      const lowerMessage = `${updateError.message || ""}`.toLowerCase();
+
+      if (lowerMessage.includes("duplicate")) {
+        return res.status(409).json({
+          error:
+            "That slot is already reserved by another active booking, so this status update cannot be applied.",
+        });
+      }
+
+      throw updateError;
+    }
+
+    const availability = await getDateAvailability(updatedBooking.booking_date);
+
+    return res.json({
+      message: `Booking marked as ${nextStatus}.`,
+      booking: updatedBooking,
+      availability,
+    });
+  } catch (error) {
+    console.error("Unable to update booking status.", error);
+    return res.status(500).json({ error: "Unable to update booking status." });
   }
 });
 
