@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import Seo from "../components/Seo";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import { buildLocalBusinessSchema, buildWebPageSchema } from "../lib/seo";
 import "./about.css";
 
 const values = [
@@ -29,8 +31,28 @@ const highlights = [
 ];
 
 export default function About() {
+  const title = "About Royalz Auto Detailing";
+  const description =
+    "Learn about Royalz Auto Detailing, our quality standards, and the premium detailing, tint, wraps, and protection services we provide in Halifax.";
+
   return (
     <>
+      <Seo
+        title={title}
+        description={description}
+        path="/about"
+        schema={{
+          "@context": "https://schema.org",
+          "@graph": [
+            buildLocalBusinessSchema(),
+            buildWebPageSchema({
+              title,
+              description,
+              path: "/about",
+            }),
+          ],
+        }}
+      />
       <SiteHeader activePage="about" />
 
       <section
