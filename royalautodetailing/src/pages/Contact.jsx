@@ -1,6 +1,8 @@
+import { useState } from "react";
 import Seo from "../components/Seo";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
+import { apiPost } from "../lib/api";
 import { buildLocalBusinessSchema, buildWebPageSchema } from "../lib/seo";
 import "./contact.css";
 
@@ -22,10 +24,61 @@ const contactCards = [
   },
 ];
 
+function createInitialFormState() {
+  return {
+    name: "",
+    email: "",
+    phone: "",
+    service: "",
+    message: "",
+  };
+}
+
 export default function Contact() {
   const title = "Contact Royalz Auto Detailing";
   const description =
     "Contact Royalz Auto Detailing in Halifax for bookings, service questions, pricing guidance, and premium vehicle care support.";
+  const [form, setForm] = useState(createInitialFormState());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setFeedback({ type: "", message: "" });
+
+    try {
+      await apiPost("/api/inquiries", {
+        source: "contact",
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        service: form.service,
+        message: form.message,
+      });
+
+      setForm(createInitialFormState());
+      setFeedback({
+        type: "success",
+        message: "Your inquiry has been sent. The Royalz team can now review it in the dashboard.",
+      });
+    } catch (error) {
+      setFeedback({
+        type: "danger",
+        message: error.message || "Unable to send your inquiry right now.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -57,9 +110,12 @@ export default function Contact() {
           <div className="row align-items-center g-4">
             <div className="col-lg-7">
               <span className="contact-kicker">Contact Royalz</span>
-              <h1 className="contact-title">Let's talk about your vehicle and the right service for it.</h1>
+              <h1 className="contact-title">
+                Let's talk about your vehicle and the right service for it.
+              </h1>
               <p className="contact-subtitle">
-                Reach out for bookings, pricing questions, service guidance, or anything else you want to clarify before visiting Royalz Auto Detailing.
+                Reach out for bookings, pricing questions, service guidance, or anything else you
+                want to clarify before visiting Royalz Auto Detailing.
               </p>
             </div>
 
@@ -107,38 +163,81 @@ export default function Contact() {
             <div className="col-lg-6">
               <div className="contact-form-wrap">
                 <span className="contact-section-label">Send A Message</span>
-                <h2 className="mt-3 mb-4">Tell us what you need and we'll point you in the right direction.</h2>
+                <h2 className="mt-3 mb-4">
+                  Tell us what you need and we'll point you in the right direction.
+                </h2>
 
-                <form className="contact-form">
+                <form className="contact-form" onSubmit={handleSubmit}>
                   <div className="row g-3">
                     <div className="col-md-6">
-                      <input type="text" className="form-control" placeholder="Your Name" />
+                      <input
+                        type="text"
+                        name="name"
+                        className="form-control"
+                        placeholder="Your Name"
+                        value={form.name}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div className="col-md-6">
-                      <input type="email" className="form-control" placeholder="Your Email" />
+                      <input
+                        type="email"
+                        name="email"
+                        className="form-control"
+                        placeholder="Your Email"
+                        value={form.email}
+                        onChange={handleChange}
+                        required
+                      />
                     </div>
                     <div className="col-md-6">
-                      <input type="tel" className="form-control" placeholder="Phone Number" />
+                      <input
+                        type="tel"
+                        name="phone"
+                        className="form-control"
+                        placeholder="Phone Number"
+                        value={form.phone}
+                        onChange={handleChange}
+                      />
                     </div>
                     <div className="col-md-6">
-                      <select className="form-select" defaultValue="">
+                      <select
+                        name="service"
+                        className="form-select"
+                        value={form.service}
+                        onChange={handleChange}
+                      >
                         <option value="">Select Service</option>
-                        <option value="tint">Royalz Tint</option>
-                        <option value="combo">Royalz Full Combo</option>
-                        <option value="wrap">Royalz Wrap</option>
-                        <option value="detailing">Detailing Consultation</option>
+                        <option value="Royalz Tint">Royalz Tint</option>
+                        <option value="Royalz Full Combo">Royalz Full Combo</option>
+                        <option value="Royalz Wrap">Royalz Wrap</option>
+                        <option value="Detailing Consultation">Detailing Consultation</option>
                       </select>
                     </div>
                     <div className="col-12">
                       <textarea
+                        name="message"
                         className="form-control"
                         rows="6"
                         placeholder="Tell us about your vehicle, service goal, or preferred booking date."
+                        value={form.message}
+                        onChange={handleChange}
+                        required
                       ></textarea>
                     </div>
+                    {feedback.message && (
+                      <div className="col-12">
+                        <div className={`alert alert-${feedback.type} mb-0`}>{feedback.message}</div>
+                      </div>
+                    )}
                     <div className="col-12">
-                      <button type="submit" className="btn btn-primary py-3 px-5">
-                        Send Inquiry
+                      <button
+                        type="submit"
+                        className="btn btn-primary py-3 px-5"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Sending..." : "Send Inquiry"}
                       </button>
                     </div>
                   </div>
@@ -152,12 +251,22 @@ export default function Contact() {
                   <span className="contact-section-label dark">Why Reach Out</span>
                   <h3 className="mt-3">We help you book with more confidence.</h3>
                   <p>
-                    If you are not sure which package fits your vehicle, we can help you narrow it down before booking. That means less guesswork and a smoother visit.
+                    If you are not sure which package fits your vehicle, we can help you narrow it
+                    down before booking. That means less guesswork and a smoother visit.
                   </p>
                   <ul className="contact-check-list list-unstyled mb-0">
-                    <li><i className="fa fa-check"></i><span>Clear service recommendations</span></li>
-                    <li><i className="fa fa-check"></i><span>Booking and scheduling support</span></li>
-                    <li><i className="fa fa-check"></i><span>Answers for pricing and prep questions</span></li>
+                    <li>
+                      <i className="fa fa-check"></i>
+                      <span>Clear service recommendations</span>
+                    </li>
+                    <li>
+                      <i className="fa fa-check"></i>
+                      <span>Booking and scheduling support</span>
+                    </li>
+                    <li>
+                      <i className="fa fa-check"></i>
+                      <span>Answers for pricing and prep questions</span>
+                    </li>
                   </ul>
                 </div>
 
@@ -176,7 +285,8 @@ export default function Contact() {
                 <div className="contact-map-card mt-4">
                   <h4 className="mb-3">Service Area</h4>
                   <p className="mb-0">
-                    Royalz Auto Detailing is based in Halifax and serves clients looking for premium detailing, tint, wraps, and vehicle protection work.
+                    Royalz Auto Detailing is based in Halifax and serves clients looking for premium
+                    detailing, tint, wraps, and vehicle protection work.
                   </p>
                 </div>
               </div>

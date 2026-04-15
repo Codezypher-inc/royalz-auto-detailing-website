@@ -12,7 +12,18 @@ import Seo from "../components/Seo";
 import SiteFooter from "../components/SiteFooter";
 import SiteHeader from "../components/SiteHeader";
 import { useAdminAuth } from "../context/AdminAuthContext";
+import { apiPost } from "../lib/api";
 import { buildLocalBusinessSchema, buildWebPageSchema } from "../lib/seo";
+
+function createInquiryFormState() {
+    return {
+        name: "",
+        email: "",
+        service: "",
+        preferredDate: "",
+        message: ""
+    };
+}
 
 function Index() {
     const title = "Premium Auto Detailing in Halifax";
@@ -59,6 +70,9 @@ function Index() {
     const [activeIndex, setActiveIndex] = useState(0);
     const { isAdmin } = useAdminAuth();
     const [showAdminToast, setShowAdminToast] = useState(isAdmin);
+    const [inquiryForm, setInquiryForm] = useState(createInquiryFormState());
+    const [isSubmittingInquiry, setIsSubmittingInquiry] = useState(false);
+    const [inquiryFeedback, setInquiryFeedback] = useState({ type: "", message: "" });
 
     useEffect(() => {
         if (isAdmin) {
@@ -72,6 +86,44 @@ function Index() {
         triggerOnce: true,
         threshold: 0.3,
     });
+
+    const handleInquiryChange = (event) => {
+        const { name, value } = event.target;
+        setInquiryForm((currentForm) => ({
+            ...currentForm,
+            [name]: value,
+        }));
+    };
+
+    const handleInquirySubmit = async (event) => {
+        event.preventDefault();
+        setIsSubmittingInquiry(true);
+        setInquiryFeedback({ type: "", message: "" });
+
+        try {
+            await apiPost("/api/inquiries", {
+                source: "homepage",
+                name: inquiryForm.name,
+                email: inquiryForm.email,
+                service: inquiryForm.service,
+                preferredDate: inquiryForm.preferredDate,
+                message: inquiryForm.message,
+            });
+
+            setInquiryForm(createInquiryFormState());
+            setInquiryFeedback({
+                type: "success",
+                message: "Your inquiry has been saved. The Royalz team can now review it in the dashboard.",
+            });
+        } catch (error) {
+            setInquiryFeedback({
+                type: "danger",
+                message: error.message || "Unable to send your inquiry right now.",
+            });
+        } finally {
+            setIsSubmittingInquiry(false);
+        }
+    };
 
     return (
         <div>
@@ -738,57 +790,82 @@ function Index() {
                                     data-wow-delay="0.6s"
                                 >
                                     <h1 className="text-white mb-4">Have a question? Reach out.</h1>
-                                    <form>
+                                    <form onSubmit={handleInquirySubmit}>
                                         <div className="row g-3">
                                             <div className="col-12 col-sm-6">
                                                 <input
                                                     type="text"
+                                                    name="name"
                                                     className="form-control border-0"
                                                     placeholder="Your Name"
+                                                    value={inquiryForm.name}
+                                                    onChange={handleInquiryChange}
                                                     style={{ height: 55 }}
+                                                    required
                                                 />
                                             </div>
                                             <div className="col-12 col-sm-6">
                                                 <input
                                                     type="email"
+                                                    name="email"
                                                     className="form-control border-0"
                                                     placeholder="Your Email"
+                                                    value={inquiryForm.email}
+                                                    onChange={handleInquiryChange}
                                                     style={{ height: 55 }}
+                                                    required
                                                 />
                                             </div>
                                             <div className="col-12 col-sm-6">
                                                 <select
+                                                    name="service"
                                                     className="form-select border-0"
-                                                    defaultValue=""
+                                                    value={inquiryForm.service}
+                                                    onChange={handleInquiryChange}
                                                     style={{ height: 55 }}
                                                 >
                                                     <option value="">Select Service</option>
-                                                    <option value={1}>Royalz Tint</option>
-                                                    <option value={2}>Royalz Full Combo</option>
-                                                    <option value={3}>Royalz Wrap</option>
+                                                    <option value="Royalz Tint">Royalz Tint</option>
+                                                    <option value="Royalz Full Combo">Royalz Full Combo</option>
+                                                    <option value="Royalz Wrap">Royalz Wrap</option>
+                                                    <option value="Detailing Consultation">Detailing Consultation</option>
                                                 </select>
                                             </div>
                                             <div className="col-12 col-sm-6">
                                                 <input
                                                     type="date"
+                                                    name="preferredDate"
                                                     className="form-control border-0"
                                                     aria-label="Service Date"
+                                                    value={inquiryForm.preferredDate}
+                                                    onChange={handleInquiryChange}
                                                     style={{ height: 55 }}
                                                 />
                                             </div>
                                             <div className="col-12">
                                                 <textarea
+                                                    name="message"
                                                     className="form-control border-0"
                                                     placeholder="Special Request"
-                                                    defaultValue={""}
+                                                    value={inquiryForm.message}
+                                                    onChange={handleInquiryChange}
+                                                    required
                                                 />
                                             </div>
+                                            {inquiryFeedback.message && (
+                                                <div className="col-12">
+                                                    <div className={`alert alert-${inquiryFeedback.type} mb-0 text-start`}>
+                                                        {inquiryFeedback.message}
+                                                    </div>
+                                                </div>
+                                            )}
                                             <div className="col-12">
                                                 <button
                                                     className="btn btn-secondary w-100 py-3"
                                                     type="submit"
+                                                    disabled={isSubmittingInquiry}
                                                 >
-                                                    Book Now
+                                                    {isSubmittingInquiry ? "Sending..." : "Send Inquiry"}
                                                 </button>
                                             </div>
                                         </div>
